@@ -1,0 +1,57 @@
+diff --git a/node_modules/@react-native-firebase/messaging/android/src/main/AndroidManifest.xml b/node_modules/@react-native-firebase/messaging/android/src/main/AndroidManifest.xml
+index 4f9a733..a5b21d3 100644
+--- a/node_modules/@react-native-firebase/messaging/android/src/main/AndroidManifest.xml
++++ b/node_modules/@react-native-firebase/messaging/android/src/main/AndroidManifest.xml
+@@ -1,5 +1,6 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android"
++          xmlns:tools="http://schemas.android.com/tools"
+           package="io.invertase.firebase.messaging">
+
+   <uses-permission android:name="android.permission.INTERNET"/>
+@@ -36,9 +37,11 @@
+       android:value="${firebaseJsonNotificationDelegationEnabled}"/>
+     <meta-data
+       android:name="com.google.firebase.messaging.default_notification_channel_id"
++      tools:replace="android:value"
+       android:value="${firebaseJsonNotificationChannelId}" />
+     <meta-data
+       android:name="com.google.firebase.messaging.default_notification_color"
++      tools:replace="android:resource"
+       android:resource="${firebaseJsonNotificationColor}" />
+   </application>
+ </manifest>
+diff --git a/node_modules/@react-native-firebase/messaging/android/src/main/java/io/invertase/firebase/messaging/ReactNativeFirebaseMessagingReceiver.java b/node_modules/@react-native-firebase/messaging/android/src/main/java/io/invertase/firebase/messaging/ReactNativeFirebaseMessagingReceiver.java
+index 59b8c6c..b5fb25e 100644
+--- a/node_modules/@react-native-firebase/messaging/android/src/main/java/io/invertase/firebase/messaging/ReactNativeFirebaseMessagingReceiver.java
++++ b/node_modules/@react-native-firebase/messaging/android/src/main/java/io/invertase/firebase/messaging/ReactNativeFirebaseMessagingReceiver.java
+@@ -29,8 +29,8 @@ public class ReactNativeFirebaseMessagingReceiver extends BroadcastReceiver {
+     RemoteMessage remoteMessage = new RemoteMessage(intent.getExtras());
+     ReactNativeFirebaseEventEmitter emitter = ReactNativeFirebaseEventEmitter.getSharedInstance();
+
+-    // Add a RemoteMessage if the message contains a notification payload
+-    if (remoteMessage.getNotification() != null) {
++    // Add a RemoteMessage if the message contains a data payload
++    if (!remoteMessage.getData().isEmpty()) {
+       notifications.put(remoteMessage.getMessageId(), remoteMessage);
+       ReactNativeFirebaseMessagingStoreHelper.getInstance()
+           .getMessagingStore()
+diff --git a/node_modules/@react-native-firebase/messaging/ios/RNFBMessaging/RNFBMessagingSerializer.m b/node_modules/@react-native-firebase/messaging/ios/RNFBMessaging/RNFBMessagingSerializer.m
+index c382ac1..2d66fe5 100644
+--- a/node_modules/@react-native-firebase/messaging/ios/RNFBMessaging/RNFBMessagingSerializer.m
++++ b/node_modules/@react-native-firebase/messaging/ios/RNFBMessaging/RNFBMessagingSerializer.m
+@@ -104,6 +104,14 @@ + (NSDictionary *)remoteMessageUserInfoToDict:(NSDictionary *)userInfo {
+     }
+     data[key] = userInfo[key];
+   }
++  // Append apsDict[@"data"] if it exists
++  if (userInfo[@"aps"] != nil) {
++    NSDictionary *apsDict = userInfo[@"aps"];
++
++    if (apsDict[@"data"] != nil && [apsDict[@"data"] isKindOfClass:[NSDictionary class]]) {
++      [data addEntriesFromDictionary:apsDict[@"data"]];
++    }
++  }
+   message[@"data"] = data;
+
+   if (userInfo[@"aps"] != nil) {

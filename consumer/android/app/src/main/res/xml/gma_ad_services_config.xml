@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This configuration file is required by Google Mobile Ads SDK
+  for Ad Services API integration (Android Privacy Sandbox)
+-->
+<ad-services-config>
+    <!-- 
+        Enable or disable ad services
+        Set to true to enable Privacy Sandbox Ad Services APIs
+    -->
+    <include-data-provider>false</include-data-provider>
+</ad-services-config>
+

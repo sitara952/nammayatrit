@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "in.mobility.keralasavaariconsumer",
+  "variantName": "keralaSavaariProdRelease",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 2,
+      "versionName": "3.0.1",
+      "outputFile": "app-keralaSavaari-prod-release.apk"
+    }
+  ],
+  "elementType": "File"
+}

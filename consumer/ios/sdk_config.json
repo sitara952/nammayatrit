@@ -1,0 +1,127 @@
+{
+  "defaultChannels": [],
+  "enableTrackerFallback": false,
+  "godelConfig": {
+    "webViewAccess": {
+      "whitelistedClientIds": []
+    }
+  },
+  "headURLs": {
+    "production": [],
+    "sandbox": []
+  },
+  "healthCheckInterval": 3000,
+  "iframeSettings": {
+    "skipSrcDoc": false
+  },
+  "intentURIs": [],
+  "logChannelsConfig": [],
+  "logToS3": false,
+  "logsConfig": {
+    "batchCount": 75,
+    "encryptionLevelKey": "encryption",
+    "errorUrl": "",
+    "fallBackPublicKeys": [],
+    "fallBackUrl": [],
+    "logPusherTimerWithChannel": 3000,
+    "logsUrlKey": "https://logs.juspay.in/godel/analytics",
+    "logsUrlKeySandbox": "https://beta.logs.juspay.in/logs",
+    "publicKey": {
+      "e": "AQAB",
+      "kid": "production_log_public_key_26_03_2021",
+      "kty": "RSA",
+      "n": "zQjBRk_OxUOfoamCGGRaHn_kiCFjKJkUjnInvCHyh_6nwr98VEE9_QcZO07NjztTZYAGyqpO7TV08X9U2S8VOdQl6b1yVQHF1O6AhEFZTaxH71ro9ljVTvyhlzEfvPvuICLPKwu19N4g6jKU9TJpec63pwQ1GTrVS6L5JMLiYtlR5onMG6NEBtYwbFlpGKTlSJGaFQ6JHFV_S7Q3txReCVnD8AM5pHiORMYOsYz-zE4secDMrbILC9ESCCbIurc8SGXkinBwETm2HZbPZnnSsctuXPRDZXZnz9F8M-lKtE1xQS5l4mkvzLWPbFbIsRx_6VVJxFRAJ0Q4M1Gl6HcZ2Q"
+    },
+    "publicKeySandbox": {
+      "e": "AQAB",
+      "kid": "sandbox-log-24-03-2021",
+      "kty": "RSA",
+      "n": "v9SaTMmbyyPiFEv8NbqQo-y7nmcKLneS8jPkL9Xby04B9xI3wXkezAEjE9dNCd_vs8QEYVJTDIxOsxPTBHc5sm9WzswZMrs7qkr4FAdVpO-UOiiOTBbv8r2GdIR5Do8BFsAAeil1XsiXz15_r2VzawZujjnj6poUbpvfZ3wI2QV4ArVmpoSkGPBKEnpKeILXoz4xZrPCwjaLrAy8qeIWwbm13f0LxSJNHSpk3E0zdf4ZtgzWClqgnJEc4Rq53XNB6h3CaFNBKti5Dcoe3eUABafniOJC4K3gwWwQJ3kQUitpgMy0MnsfGjt2UgqLJTAx8ZZJVrNyFnjYq0QsZibsFw"
+    },
+    "pushTimer": 10000,
+    "pusherTimerKey": "10.0",
+    "retryAttempts": -1,
+    "sessioniseTimer": 2000,
+    "shouldPush": true,
+    "workingLogger": "json-array"
+  },
+  "preRenderConfig": {
+    "common": "1.0",
+    "meesho": "1.0"
+  },
+  "runHealthCheck": false,
+  "safemode": {
+    "blacklist": {
+      "sdkVersions": [
+        "2.0.0",
+        "2.0.1",
+        "2.0.2",
+        "2.0.3",
+        "2.0.4",
+        "2.1.0",
+        "2.1.1",
+        "2.1.2"
+      ]
+    },
+    "enabled": false
+  },
+  "sequentialLoadClients": [],
+  "sequentialLoadEnable": false,
+  "uiFeatures": {
+    "nbListItemCaching": {
+      "bgCacheCapacity": 4,
+      "blacklistedClientIds": [],
+      "useCache": true
+    }
+  },
+  "unifiedLoader": false,
+  "url": {
+    "api": {
+      "fallbackUrls": [
+        "https://api-ns3.juspay.in",
+        "https://public.releases.juspay.in/wapi"
+      ],
+      "prod": "https://public.releases.juspay.in/wapi",
+      "production_static1": "https://api-ns1.juspay.in",
+      "sandbox": "https://sandbox.juspay.in"
+    },
+    "assets": {
+      "prod": "https://assets.juspay.in",
+      "sandbox": "https://sandbox.assets.juspay.in"
+    },
+    "endUrl": {
+      "prod": [
+        "https://olamoney.com",
+        "https://www.reload.in/recharge/",
+        ".*www.reload.in/payment/f.*",
+        ".*sandbox.juspay.in\\/thankyou.*",
+        ".*wallet.juspay.dev:8080/recharge/payment.*",
+        ".*www.foodstag.in\\/payment-gateway\\/handle-payment.*",
+        ".*sandbox.juspay.in\\/end.*",
+        ".*voonik.org\\/checkout\\/juspay_callback",
+        ".*localhost.*",
+        ".*api.juspay.in\\/end.*"
+      ],
+      "sandbox": [
+        "https://olamoney.com",
+        "https://www.reload.in/recharge/",
+        ".*www.reload.in/payment/f.*",
+        ".*sandbox.juspay.in\\/thankyou.*",
+        ".*wallet.juspay.dev:8080/recharge/payment.*",
+        ".*www.foodstag.in\\/payment-gateway\\/handle-payment.*",
+        ".*sandbox.juspay.in\\/end.*",
+        ".*voonik.org\\/checkout\\/juspay_callback",
+        ".*localhost.*",
+        ".*api.juspay.in\\/end.*"
+      ]
+    },
+    "webReleaseDomain": {
+      "prod": "https://public.releases.juspay.in",
+      "sandbox": "https://sandbox.assets.juspay.in"
+    }
+  },
+  "useCommitClientIds": {},
+  "variant_ids": [],
+  "version": "1.39.6",
+  "whiteListedEventsV2": []
+}

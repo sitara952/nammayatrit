@@ -1,0 +1,68 @@
+<html>
+
+<head>
+</head>
+
+<body>
+</body>
+<script type="text/javascript">
+  var microAppId = 'Hyper-OS';
+  document.title = microAppId;
+  window.JBridge = top.JBridge;
+  window.Android = top.Android;
+  window.DUIGatekeeper = window.JBridge;
+  window.__OS = "IOS";
+  window.__DEVICE_DETAILS = JSON.parse(JBridge.deviceDetails());
+  window.onFileUpdated = function () {
+    console.log("arguments -=>", arguments)
+    //JBridge.toast("GOT UPDATE");
+    if (arguments[0].includes("v1-index_bundle.jsa")) {
+      //JBridge.toast("BUNDLE UPDATE AVAILABLE");
+      JBridge.runInJuspayBrowser("onEvent", JSON.stringify({
+        event: "reboot",
+        service: "in.juspay.becknui",
+        payload: {},
+        error: false,
+        errorMessage: "",
+        errorCode: ""
+      }), "");
+      console.log("arguments after -=>", arguments)
+    }
+
+  }
+  window.JOS.addEventListener("onFileUpdated")();
+
+  let loadApp = () => {
+    var headID = document.getElementsByTagName("head")[0];
+    var newScript = document.createElement('script');
+    newScript.type = 'text/javascript';
+    newScript.id = "mystique";
+
+    useDevServer = false;
+
+    if (useDevServer) {
+      
+      var ip = JBridge.loadFileInDUI("ip.txt").trim();
+      if (!ip) {
+        ip = "localhost"
+      }
+      var url = "http://" + ip + ":8084/dist";
+      console.warn("loading from: ", url);
+      newScript.src = url + "/index_bundle.js";
+    } else {
+      var innerHTML = "";
+      if (parseInt(JBridge.getValueFromPlistForKey("dev_build"))) {
+        innerHTML = JBridge.loadFileInDUI('v1-index_bundle.jsa');
+      }
+      if (innerHTML.length == 0) {
+        innerHTML = JBridge.loadFileInDUI('v1-index_bundle.jsa');
+      }
+      newScript.innerHTML = innerHTML;
+
+    }
+    headID.appendChild(newScript);
+  }
+  loadApp();
+</script>
+
+</html>

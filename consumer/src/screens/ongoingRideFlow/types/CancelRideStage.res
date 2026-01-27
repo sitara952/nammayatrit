@@ -1,0 +1,3 @@
+type cancelRideStage =
+  | CancelConfirmation
+  | CancellationList

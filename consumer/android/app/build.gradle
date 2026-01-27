@@ -1,0 +1,417 @@
+import com.android.build.api.variant.*
+
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+apply plugin: "com.mobility.movingtech"
+apply plugin: 'hypersdk.plugin'
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-parcelize"
+
+react {
+
+    // React Native configuration (uncomment as necessary)
+    debuggableVariants = ['nammaYatriDevDebug', 'manaYatriDevDebug', 'bridgeDevDebug', 'yatriSathiDevDebug', 'yatriDevDebug', 'odishaYatriDevDebug', 'keralaSavaariDevDebug', 'cumtaDevDebug', 'bharatTaxiDevDebug']
+    autolinkLibrariesWithApp()
+}
+
+def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
+def keystorePropertiesFile = rootProject.file("keystore.properties");
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+project.ext.envConfigFiles = [
+        nammayatriproddebug: "../env/.env.development",
+        nammayatriprodrelease: "../env/.env.production",
+        nammayatridevdebug: "../env/.env.development",
+        nammayatridevrelease: "../env/.env.production",
+
+        manayatriproddebug: "../env/.env.development",
+        manayatriprodrelease: "../env/.env.production",
+        manayatridevdebug: "../env/.env.development",
+        manayatridevrelease: "../env/.env.production",
+
+        bridgeproddebug: "../env/.env.development",
+        bridgeprodrelease: "../env/.env.production",
+        bridgedevdebug: "../env/.env.development",
+        bridgedevrelease: "../env/.env.production",
+
+        yatrisathiproddebug: "../env/.env.development",
+        yatrisathiprodrelease: "../env/.env.production",
+        yatrisathidevdebug: "../env/.env.development",
+        yatrisathidevrelease: "../env/.env.production",
+
+        yatriproddebug: "../env/.env.development",
+        yatriprodrelease: "../env/.env.production",
+        yatridevdebug: "../env/.env.development",
+        yatridevrelease: "../env/.env.production",
+
+        odishayatriproddebug: "../env/.env.development",
+        odishayatriprodrelease: "../env/.env.production",
+        odishayatridevdebug: "../env/.env.development",
+        odishayatridevrelease: "../env/.env.production",
+
+        // **New Kerala Savaari Build Variants**
+        keralasavaariproddebug: "../env/.env.development",
+        keralasavaariprodrelease: "../env/.env.production",
+        keralasavaaridevdebug: "../env/.env.development",
+        keralasavaaridevrelease: "../env/.env.production",
+
+        // **New Kerala Savaari Build Variants**
+        cumtaproddebug: "../env/.env.development",
+        cumtaprodrelease: "../env/.env.production",
+        cumtadevdebug: "../env/.env.development",
+        cumtadevrelease: "../env/.env.production",
+
+        bharatTaxiproddebug: "../env/.env.development",
+        bharatTaxiprodrelease: "../env/.env.production",
+        bharatTaxidevdebug: "../env/.env.development",
+        bharatTaxidevrelease: "../env/.env.production",
+]
+
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+
+// Fix for duplicate androidsvg classes (JAR and AAR conflict)
+configurations.all {
+    resolutionStrategy {
+        // Force a single version of androidsvg (AAR variant)
+        force 'com.caverock:androidsvg-aar:1.4'
+    }
+    // Exclude the JAR variant to prevent duplicates
+    exclude group: 'com.caverock', module: 'androidsvg'
+}
+
+android {
+    def host = getLocalAddress()?.getHostAddress() ?: ""
+    ndkVersion rootProject.ext.ndkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
+
+    namespace "com.mobility.movingtech"
+    compileOptions{
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        exclude "lib/x86_64/libandroidlame.so"
+        exclude "lib/x86_64/libucrop.so"
+    }
+
+    Properties properties = new Properties()
+    if (rootProject.file("local.properties").exists()) {
+        properties.load(rootProject.file("local.properties").newDataInputStream())
+    }
+    kotlinOptions {
+        freeCompilerArgs += ["-Xskip-metadata-version-check"]
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            if (keystorePropertiesFile.exists()) {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.mobility.movingtech"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode  1
+        versionName "99.0.0"
+        resValue "string", "bundled_js_version", "0.0.131"
+        resValue "string", "build_config_package", "com.mobility.movingtech"
+        manifestPlaceholders["googleMapsApiKey"] = properties.getProperty('google.maps.api.key')
+        externalNativeBuild {
+            cmake {
+                // cppFlags "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+                arguments "-DANDROID_STL=c++_shared"
+            }
+        }
+        manifestPlaceholders["googleAdMobAppId"] = properties.getProperty('GOOGLE_AD_MOB_ID')
+    }
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+            applicationIdSuffix '.debug'
+            debuggable true
+            manifestPlaceholders = [
+                    appIcon     : "@mipmap/ic_launcher_debug",
+                    appIconRound: "@mipmap/ic_launcher_debug",
+                    isUsesCleartextTraffic: "true"
+            ]
+            resValue "string", "facebook_app_id", properties.getProperty("FACEBOOK_APP_ID","NA")
+            resValue "string", "facebook_client_token", properties.getProperty("FACEBOOK_CLIENT_TOKEN","NA")
+            resValue "string", "fb_login_protocol_scheme", properties.getProperty("FB_LOGIN_PROTOCOL_SCHEMA","NA")
+            resValue "string", "clevertap_account_id", properties.getProperty("CLEVERTAP_ACCOUNT_ID","")
+            resValue "string", "clevertap_token", properties.getProperty("CLEVERTAP_TOKEN","")
+            resValue "string", "clevertap_region", properties.getProperty("CLEVERTAP_REGION","")
+            resValue "string", "moengage_app_id", properties.getProperty("MOENGAGE_APP_ID","")
+            resValue "string", "truecaller_client_id", properties.getProperty("TRUECALLER_CLIENT_ID", "")
+            resValue "string", "truecaller_partner_key",properties.getProperty("TRUECALLER_CLIENT_ID", "")
+            resValue "string", "local_ip", host
+            buildConfigField "String", "RS_ENC_KEY", properties.getProperty("RS_ENC_KEY", "\"\"")
+            buildConfigField "String", "RS_ALGO", properties.getProperty("RS_ALGO", "\"\"")
+            buildConfigField "String", "RS_INSTANCE_TYPE", properties.getProperty("RS_INSTANCE_TYPE", "\"\"")
+            buildConfigField "String", "RS_ALGO_PADDING", properties.getProperty("RS_ALGO_PADDING", "\"\"")
+        }
+        release {
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+            minifyEnabled true
+            debuggable false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            manifestPlaceholders = [
+                    appIcon     : "@mipmap/ic_launcher",
+                    appIconRound: "@mipmap/ic_launcher_round",
+                    isUsesCleartextTraffic: "false"
+            ]
+            resValue "string", "facebook_app_id", properties.getProperty("FACEBOOK_APP_ID","NA")
+            resValue "string", "facebook_client_token", properties.getProperty("FACEBOOK_CLIENT_TOKEN","NA")
+            resValue "string", "fb_login_protocol_scheme", properties.getProperty("FB_LOGIN_PROTOCOL_SCHEMA","NA")
+            resValue "string", "clevertap_account_id", properties.getProperty("CLEVERTAP_ACCOUNT_ID","NA")
+            resValue "string", "clevertap_token", properties.getProperty("CLEVERTAP_TOKEN","NA")
+            resValue "string", "clevertap_region", properties.getProperty("CLEVERTAP_REGION","NA")
+            resValue "string", "moengage_app_id", properties.getProperty("MOENGAGE_APP_ID","")
+            resValue "string", "truecaller_client_id", properties.getProperty("TRUECALLER_CLIENT_ID", "")
+            resValue "string", "truecaller_partner_key",properties.getProperty("TRUECALLER_CLIENT_ID", "")
+            resValue "string", "local_ip", host
+
+            buildConfigField "String", "RS_ENC_KEY", properties.getProperty("RS_ENC_KEY", "\"\"")
+            buildConfigField "String", "RS_ALGO", properties.getProperty("RS_ALGO", "\"\"")
+            buildConfigField "String", "RS_INSTANCE_TYPE", properties.getProperty("RS_INSTANCE_TYPE", "\"\"")
+            buildConfigField "String", "RS_ALGO_PADDING", properties.getProperty("RS_ALGO_PADDING", "\"\"")
+        }
+    }
+
+    flavorDimensions "app", "mode"
+    productFlavors {
+        prod {
+            resValue "string", "flavor", "\"prod\""
+            resValue "string", "MERCHANT_ID", properties.getProperty("MERCHANT_ID", "")
+            resValue "string", "CONFIG_URL", properties.getProperty("CONFIG_URL", "")
+            buildConfigField "String", "LOG_URL", properties.getProperty("LOG_URL", "")
+            buildConfigField "String", "flavor", "\"prod\""
+            buildConfigField "String", "MERCHANT_ID", properties.getProperty("MERCHANT_ID", "")
+            buildConfigField "String", "CONFIG_URL", properties.getProperty("CONFIG_URL", "")
+            dimension "mode"
+        }
+        dev {
+            resValue "string", "flavor", "\"dev\""
+            resValue "string", "MERCHANT_ID", properties.getProperty("MERCHANT_ID", "")
+            resValue "string", "CONFIG_URL", properties.getProperty("CONFIG_URL", "")
+            buildConfigField "String", "flavor", "\"dev\""
+            buildConfigField "String", "MERCHANT_ID", properties.getProperty("MERCHANT_ID", "")
+            buildConfigField "String", "CONFIG_URL", properties.getProperty("CONFIG_URL", "")
+            buildConfigField "String", "LOG_URL", properties.getProperty("LOG_URL", "")
+            dimension "mode"
+        }
+        nammaYatri {
+            applicationId "in.juspay.nammayatri"
+            resValue "string", "app_name", "Namma Yatri"
+            dimension "app"
+        }
+        manaYatri {
+            applicationId "in.mobility.manayatri"
+            resValue "string", "app_name", "Mana Yatri"
+            dimension "app"
+        }
+        bridge {
+            applicationId "com.mobility.movingtech"
+            resValue "string", "app_name", "Bridge"
+            dimension "app"
+        }
+        yatriSathi {
+            applicationId "in.juspay.jatrisaathi"
+            resValue "string", "app_name", "Yatri Sathi"
+            dimension "app"
+        }
+        yatri {
+            applicationId "net.openkochi.yatri"
+            resValue "string", "app_name", "Yatri"
+            dimension "app"
+        }
+        odishaYatri {
+            applicationId "in.mobility.odishayatri"
+            resValue "string", "app_name", "Odisha Yatri"
+            dimension "app"
+        }
+        keralaSavaari {
+            applicationId "in.mobility.keralasavaariconsumer"
+            resValue "string", "app_name", "Kerala Savaari"
+            dimension "app"
+        }
+        cumta {
+            applicationId "in.mobility.cumta"
+            resValue "string", "app_name", "Chennai One"
+            dimension "app"
+
+            // UTS SDK Configuration
+            buildConfigField "String", "UTS_CLIENT_NAME", properties.getProperty("UTS_CLIENT_NAME", "\"\"")
+            buildConfigField "String", "UTS_CLIENT_VERSION", properties.getProperty("UTS_CLIENT_VERSION", "\"\"")
+            buildConfigField "String", "UTS_CLIENT_ID", properties.getProperty("UTS_CLIENT_ID", "\"\"")
+            buildConfigField "String", "UTS_API_KEY", properties.getProperty("UTS_API_KEY", "\"\"")
+            buildConfigField "String", "UTS_API_SECRET", properties.getProperty("UTS_API_SECRET", "\"\"")
+        }
+        bharatTaxi {
+            applicationId "in.mobility.bharatTaxi"
+            resValue "string", "app_name", "Bharat Taxi"
+            dimension "app"
+        }
+    }
+
+    sourceSets {
+        nammaYatri.setRoot('src/nammaYatri')
+        manaYatri.setRoot('src/manaYatri')
+        bridge.setRoot('src/bridge')
+        yatriSathi.setRoot('src/yatriSathi')
+        yatri.setRoot('src/yatri')
+        odishaYatri.setRoot('src/odishaYatri')
+        keralaSavaari.setRoot('src/keralaSavaari')
+        bharatTaxi.setRoot('src/bharatTaxi')
+        cumta.setRoot('src/cumta')
+        dev {
+            res {
+                srcDirs 'src/dev/res'
+            }
+        }
+        // zxc Add generated sources for manual PackageList
+        main.java.srcDirs += 'build/generated/rncli/src/main/java'
+    }
+
+    // Fix for Issue #2: Ensure all native libraries are properly packaged
+    // This prevents "couldn't find DSO to load" crashes on app startup
+    packaging {
+        // Prevent duplicate libc++_shared.so from different sources
+        pickFirst 'lib/x86/libc++_shared.so'
+        pickFirst 'lib/x86_64/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+
+        // Ensure React Native native libraries are included
+        pickFirst 'lib/x86/libreactnative.so'
+        pickFirst 'lib/x86_64/libreactnative.so'
+        pickFirst 'lib/armeabi-v7a/libreactnative.so'
+        pickFirst 'lib/arm64-v8a/libreactnative.so'
+
+        // Include other essential React Native libraries
+        pickFirst 'lib/x86/libhermes.so'
+        pickFirst 'lib/x86_64/libhermes.so'
+        pickFirst 'lib/armeabi-v7a/libhermes.so'
+        pickFirst 'lib/arm64-v8a/libhermes.so'
+
+        pickFirst 'lib/x86/libfbjni.so'
+        pickFirst 'lib/x86_64/libfbjni.so'
+        pickFirst 'lib/armeabi-v7a/libfbjni.so'
+        pickFirst 'lib/arm64-v8a/libfbjni.so'
+    }
+}
+
+static InetAddress getLocalAddress() throws SocketException {
+    List<NetworkInterface> ifaces = Collections.list(NetworkInterface.getNetworkInterfaces())
+    ifaces.sort { a, b -> (a.getName() <=> b.getName()) }
+    Iterator<NetworkInterface> ifaceIterator = ifaces.iterator()
+
+    while (ifaceIterator.hasNext()) {
+        NetworkInterface iface = ifaceIterator.next()
+        Enumeration<InetAddress> addresses = iface.getInetAddresses()
+
+        while (addresses.hasMoreElements()) {
+            InetAddress addr = addresses.nextElement()
+            if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
+                return addr
+            }
+        }
+    }
+    return null
+}
+
+dependencies {
+    implementation project(':react-native-config')
+    implementation("com.facebook.react:react-android")
+    // Fix for Issue #1: Update Google Maps SDK to latest stable version
+    implementation 'com.google.maps.android:maps-ktx:5.2.0'
+    implementation 'com.google.android.play:app-update-ktx:2.1.0'
+    implementation('com.google.maps.android:android-maps-utils:3.8.2')
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'in.juspay:mobilitycustomer:2.1.33-nammayatri.16'
+    implementation 'com.google.firebase:firebase-dynamic-links'
+    implementation ('in.juspay:mobilityapp:2.1.33-nammayatri.22') {
+        exclude module: 'unspecified'
+    }
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
+    implementation platform('com.google.firebase:firebase-bom:33.1.1')
+    implementation 'com.google.firebase:firebase-messaging:24.0.0'
+    implementation 'com.google.firebase:firebase-config'
+    implementation 'com.google.android.gms:play-services-auth:20.5.0'
+    implementation 'com.google.android.gms:play-services-auth-api-phone:18.0.1'
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'com.google.android.play:review-ktx:2.0.2'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
+    cumtaImplementation project(":utsmasdk")
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.activity:activity:1.9.3")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    implementation 'com.android.installreferrer:installreferrer:2.2'
+    implementation "com.truecaller.android.sdk:truecaller-sdk:3.1.0"
+    implementation 'androidx.core:core-ktx:1.16.0'
+    implementation("org.bouncycastle:bcprov-jdk18on:1.76")
+    implementation("org.bouncycastle:bcpkix-jdk18on:1.76")
+    implementation project(':react-native-fbsdk-next')
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1'
+    implementation("com.google.android.gms:play-services-ads:24.7.0")
+
+    compileOnly "com.movingtech:appmonitor:1.0.3@aar"
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
+    }
+
+    // HyperQR SDK for QR Code Payments in hybrid flows
+    implementation 'in.juspay:hyperqr:2.2.2'
+
+    // MoEngage SDK for analytics and engagement
+    implementation(platform("com.moengage:android-bom:1.4.1"))
+}
+
+apply plugin: "com.google.gms.google-services"
+apply plugin: "com.google.firebase.crashlytics"
+
+def props = new Properties()
+def propsFile = rootProject.file("local.properties")
+if (propsFile.exists()) {
+    props.load(new FileInputStream(propsFile))
+}
+
+def resolvedClientId = props.getProperty("CLIENT_ID", "").trim()
+
+if (!resolvedClientId) {
+    throw new GradleException("❌ CLIENT_ID is missing or empty in local.properties. Please set a valid value. Example: CLIENT_ID=cumta/nammayatribap/odishayatri")
+}
+
+hyperSdkPlugin {
+    clientId = resolvedClientId
+    sdkVersion = "2.2.2"
+}

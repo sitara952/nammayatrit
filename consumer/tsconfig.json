@@ -1,0 +1,19 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": "./",
+        "skipLibCheck": true,
+        "types": ["node"],
+        "noPropertyAccessFromIndexSignature": false,
+        "paths": {
+            "@/src-v2/*": ["src-v2/*"],
+            "#/babyconfig/*": ["../babyconfig/*"],
+            "@/*": ["src/*"],
+            "@designSystem/*": ["src/typescript/designSystem/*"],
+            "crypto": ["node_modules/crypto-browserify"],
+            "@/typescript/*": ["src/typescript/*"]
+        }
+    },
+    "include": ["src/**/*", "src-v2/**/*", "../babyconfig/**/*", "./global.d.ts", "global.d.ts"],
+    "exclude": ["node_modules"]
+}

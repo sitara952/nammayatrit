@@ -1,0 +1,294 @@
+{
+  "app_list": [
+    "in.juspay.ec",
+    "in.juspay.godel",
+    "in.juspay.godel.placeholder",
+    "in.juspay.hyperapi",
+    "in.juspay.hyperos",
+    "in.juspay.hyperos.placeholder",
+    "in.juspay.hyperpay",
+    "in.juspay.upiintent",
+    "in.yatri.consumer"
+  ],
+  "dependencies": {
+    "in.juspay.ec": {
+      "default": {
+        "entry": "base.html",
+        "required_apps": [
+          "in.juspay.godel.placeholder",
+          "in.juspay.hyperos.placeholder",
+          "in.juspay.upiintent"
+        ],
+        "root": "payments/in.juspay.ec/"
+      }
+    },
+    "in.juspay.godel": {
+      "default": {
+        "entry": "base.html",
+        "root": "payments/in.juspay.godel/"
+      }
+    },
+    "in.juspay.godel.placeholder": {
+      "default": {
+        "entry": "",
+        "root": "payments/in.juspay.godel/"
+      }
+    },
+    "in.juspay.hyperapi": {
+      "default": {
+        "entry": "base.html",
+        "required_apps": [
+          "in.juspay.ec"
+        ],
+        "root": "payments/in.juspay.hyperapi/"
+      }
+    },
+    "in.juspay.hyperos": {
+      "default": {
+        "entry": "",
+        "root": ""
+      }
+    },
+    "in.juspay.hyperos.placeholder": {
+      "default": {
+        "entry": "",
+        "root": ""
+      }
+    },
+    "in.juspay.hyperpay": {
+      "default": {
+        "entry": "base.html",
+        "required_apps": [
+          "in.juspay.ec"
+        ],
+        "root": "payments/in.juspay.hyperpay/"
+      }
+    },
+    "in.juspay.upiintent": {
+      "default": {
+        "entry": "base.html",
+        "root": "payments/in.juspay.upiintent/"
+      }
+    },
+    "in.yatri.consumer": {
+      "default": {
+        "entry": "becknbase.html",
+        "root": ""
+      }
+    }
+  },
+  "live": {
+    "assets": {
+      "in.juspay.ec": {
+        "config": "https://assets.juspay.in/juspay/payments/in.juspay.ec/release/v1-config.jsa"
+      },
+      "in.juspay.godel": {
+        "acs_js_source": "https://d3e0hckk6jr53z.cloudfront.net/0.6rc9/v1-acs.jsa",
+        "config": "https://d3e0hckk6jr53z.cloudfront.net/godel/v1-config.jsa"
+      },
+      "in.juspay.godel.placeholder": {
+        "acs_js_source": "https://d3e0hckk6jr53z.cloudfront.net/0.6rc9/v1-acs.jsa",
+        "config": "https://d3e0hckk6jr53z.cloudfront.net/godel/v1-config.jsa"
+      },
+      "in.juspay.hyperos": {
+        "config": "https://assets.juspay.in/juspay/payments/2.0/release/v1-config.jsa",
+        "manifest": "https://assets.juspay.in/hyper/bundles/in.juspay.merchants/yatrisathiconsumer/ios/cug/manifest.json",
+        "sdk_config": "https://assets.juspay.in/hyper/bundles/in.juspay.merchants/yatrisathiconsumer/ios/cug/sdk_config.json",
+        "unified_config": "https://assets.juspay.in/hyper/configs/in.juspay.merchants/yatrisathiconsumer/ios/cug/unified_config.json"
+      },
+      "in.juspay.hyperos.placeholder": {
+        "tracker": "https://assets.juspay.in/hyper/bundles/app/tracker/2.1.4/v1-tracker.jsa"
+      },
+      "in.juspay.hyperpay": {
+        "configuration": "https://assets.juspay.in/hyper/configs/yatrisathi/in.juspay.hyperpay/1.3.1/v1-configuration.jsa",
+        "icons": "https://assets.juspay.in/hyper/bundles/in.juspay.merchants/yatrisathi/configuration/1.20/v1-icons.jsa",
+        "strings": "https://assets.juspay.in/hyper/configs/yatrisathi/in.juspay.hyperpay/1.3.1/v1-strings.jsa"
+      },
+      "in.juspay.upiintent": {
+        "config": "https://assets.juspay.in/juspay/payments/in.juspay.upiintent/release/v1-config.jsa"
+      },
+      "in.yatri.consumer": {
+        "configuration": "https://assets.moving.tech/hyper/configs/yatrisathiconsumer/in.yatri.consumer/2.0.7/v1-configuration.jsa"
+      }
+    },
+    "id": "42114946619670567-patch-1.47.7",
+    "package": {
+      "in.juspay.ec": "https://assets.juspay.in/hyper/bundles/app/in.juspay.ec/3.18.4/ios/v1-index_bundle.jsa",
+      "in.juspay.hyperpay": "https://assets.juspay.in/hyper/bundles/app/in.juspay.hyperpay/3.49.26-release-20230814.2/ios/v1-index_bundle.jsa",
+      "in.juspay.upiintent": "https://assets.juspay.in/hyper/bundles/app/in.juspay.upiintent/4.1.5/ios/v1-index_bundle.jsa",
+      "in.yatri.consumer": "https://assets.moving.tech/hyper/bundles/app/in.yatri.consumer/3.0.104/ios/v1-index_bundle.jsa"
+    },
+    "package_version": "47_consumer_ios"
+  },
+  "meta": {
+    "clientId": "yatrisathiconsumer",
+    "timeStamp": "Thursday 26 December, 2024 at 01:52:54 PM IST"
+  },
+  "new": {
+    "assets": {
+      "in.juspay.ec": {
+        "config": "https://assets.juspay.in/juspay/payments/in.juspay.ec/release/v1-config.jsa"
+      },
+      "in.juspay.godel": {
+        "acs_js_source": "https://d3e0hckk6jr53z.cloudfront.net/0.6rc9/v1-acs.jsa",
+        "config": "https://d3e0hckk6jr53z.cloudfront.net/godel/v1-config.jsa"
+      },
+      "in.juspay.godel.placeholder": {
+        "acs_js_source": "https://d3e0hckk6jr53z.cloudfront.net/0.6rc9/v1-acs.jsa",
+        "config": "https://d3e0hckk6jr53z.cloudfront.net/godel/v1-config.jsa"
+      },
+      "in.juspay.hyperos": {
+        "config": "https://assets.juspay.in/juspay/payments/2.0/release/v1-config.jsa",
+        "manifest": "https://assets.juspay.in/hyper/bundles/in.juspay.merchants/yatrisathiconsumer/ios/cug/manifest.json",
+        "sdk_config": "https://assets.juspay.in/hyper/bundles/in.juspay.merchants/yatrisathiconsumer/ios/cug/sdk_config.json",
+        "unified_config": "https://assets.juspay.in/hyper/configs/in.juspay.merchants/yatrisathiconsumer/ios/cug/unified_config.json"
+      },
+      "in.juspay.hyperos.placeholder": {
+        "tracker": "https://assets.juspay.in/hyper/bundles/app/tracker/2.1.4/v1-tracker.jsa"
+      },
+      "in.juspay.hyperpay": {
+        "configuration": "https://assets.juspay.in/hyper/configs/yatrisathi/in.juspay.hyperpay/1.3.1/v1-configuration.jsa",
+        "icons": "https://assets.juspay.in/hyper/bundles/in.juspay.merchants/yatrisathi/configuration/1.20/v1-icons.jsa",
+        "strings": "https://assets.juspay.in/hyper/configs/yatrisathi/in.juspay.hyperpay/1.3.1/v1-strings.jsa"
+      },
+      "in.juspay.upiintent": {
+        "config": "https://assets.juspay.in/juspay/payments/in.juspay.upiintent/release/v1-config.jsa"
+      },
+      "in.yatri.consumer": {
+        "configuration": "https://assets.moving.tech/hyper/configs/yatrisathiconsumer/in.yatri.consumer/2.0.14/v1-configuration.jsa"
+      }
+    },
+    "id": "580267748098201-patch-1.47.7",
+    "package": {
+      "in.juspay.ec": "https://assets.juspay.in/hyper/bundles/app/in.juspay.ec/3.18.4/ios/v1-index_bundle.jsa",
+      "in.juspay.hyperpay": "https://assets.juspay.in/hyper/bundles/app/in.juspay.hyperpay/3.49.26-release-20230814.2/ios/v1-index_bundle.jsa",
+      "in.juspay.upiintent": "https://assets.juspay.in/hyper/bundles/app/in.juspay.upiintent/4.1.5/ios/v1-index_bundle.jsa",
+      "in.yatri.consumer": "https://assets.moving.tech/hyper/bundles/app/in.yatri.consumer/3.0.120/ios/v1-index_bundle.jsa"
+    },
+    "package_version": "54_consumer_ios"
+  },
+  "overrides": [
+    {
+      "condition": "var appVersion = '0.0'; try{appVersion = JSON.parse(JBridge.getSessionInfo()).app_version}catch(e){};appVersion.replace( /^\\D+/g, '').localeCompare('1.0.9', undefined, { numeric: true, sensitivity: 'base' }) < 0",
+      "result": {
+        "live": {
+          "assets": {
+            "in.yatri.consumer": {
+              "configuration": "https://assets.moving.tech/hyper/configs/yatrisathiconsumer/in.yatri.consumer/2.0.7/v1-configuration.jsa"
+            }
+          },
+          "package": {
+            "in.yatri.consumer": "https://assets.moving.tech/hyper/bundles/app/in.yatri.consumer/3.0.104/ios/v1-index_bundle.jsa"
+          }
+        },
+        "new": {
+          "assets": {
+            "in.yatri.consumer": {
+              "configuration": "https://assets.moving.tech/hyper/configs/yatrisathiconsumer/in.yatri.consumer/2.0.7/v1-configuration.jsa"
+            }
+          },
+          "package": {
+            "in.yatri.consumer": "https://assets.moving.tech/hyper/bundles/app/in.yatri.consumer/3.0.104/ios/v1-index_bundle.jsa"
+          }
+        }
+      }
+    },
+    {
+      "condition": "var appVersion = '0.0'; try{appVersion = JSON.parse(JBridge.getSessionInfo()).app_version}catch(e){};appVersion.replace( /^\\D+/g, '').localeCompare('1.0.8', undefined, { numeric: true, sensitivity: 'base' }) < 0",
+      "result": {
+        "live": {
+          "assets": {
+            "in.yatri.consumer": {
+              "configuration": "https://assets.juspay.in/hyper/configs/yatrisathiconsumer/in.yatri.consumer/1.0.12-main-yatrisathiconsumer.15/v1-configuration.jsa"
+            }
+          },
+          "package": {
+            "in.yatri.consumer": "https://assets.juspay.in/hyper/bundles/app/in.yatri.consumer/1.9.124/ios/v1-index_bundle.jsa"
+          }
+        },
+        "new": {
+          "assets": {
+            "in.yatri.consumer": {
+              "configuration": "https://assets.juspay.in/hyper/configs/yatrisathiconsumer/in.yatri.consumer/1.0.12-main-yatrisathiconsumer.15/v1-configuration.jsa"
+            }
+          },
+          "package": {
+            "in.yatri.consumer": "https://assets.juspay.in/hyper/bundles/app/in.yatri.consumer/1.9.124/ios/v1-index_bundle.jsa"
+          }
+        }
+      }
+    },
+    {
+      "condition": "var appVersion = '0.0'; try{appVersion = JSON.parse(JBridge.getSessionInfo()).app_version}catch(e){};appVersion.replace( /^\\D+/g, '').localeCompare('1.0.5', undefined, { numeric: true, sensitivity: 'base' }) < 0",
+      "result": {
+        "live": {
+          "assets": {
+            "in.yatri.consumer": {
+              "configuration": "https://assets.juspay.in/hyper/configs/yatrisathiconsumer/in.yatri.consumer/1.0.12-main-yatrisathiconsumer.2/v1-configuration.jsa"
+            }
+          },
+          "package": {
+            "in.yatri.consumer": "https://assets.juspay.in/hyper/bundles/app/in.yatri.consumer/1.8.93/ios/v1-index_bundle.jsa"
+          }
+        },
+        "new": {
+          "assets": {
+            "in.yatri.consumer": {
+              "configuration": "https://assets.juspay.in/hyper/configs/yatrisathiconsumer/in.yatri.consumer/1.0.12-main-yatrisathiconsumer.2/v1-configuration.jsa"
+            }
+          },
+          "package": {
+            "in.yatri.consumer": "https://assets.juspay.in/hyper/bundles/app/in.yatri.consumer/1.8.93/ios/v1-index_bundle.jsa"
+          }
+        }
+      }
+    },
+    {
+      "condition": "var appVersion = '0.0'; try{appVersion = JSON.parse(JBridge.getSessionInfo()).app_version}catch(e){};appVersion.replace( /^\\D+/g, '').localeCompare('1.0.4', undefined, { numeric: true, sensitivity: 'base' }) < 0",
+      "result": {
+        "live": {
+          "package": {
+            "in.yatri.consumer": "https://assets.juspay.in/hyper/bundles/app/in.yatri.consumer/1.8.57/ios/v1-index_bundle.jsa"
+          }
+        },
+        "new": {
+          "package": {
+            "in.yatri.consumer": "https://assets.juspay.in/hyper/bundles/app/in.yatri.consumer/1.8.57/ios/v1-index_bundle.jsa"
+          }
+        }
+      }
+    },
+    {
+      "condition": "var packageName=''; try{ packageName=JSON.parse(JBridge.getSessionInfo()).package_name;}catch(e){};packageName.includes('.debug');",
+      "result": {
+        "live": {
+          "assets": {
+            "in.yatri.consumer": {
+              "configuration": "https://assets.moving.tech/hyper/configs/yatrisathiconsumer/in.yatri.consumer/2.0.14/v1-configuration.jsa"
+            }
+          },
+          "package": {
+            "in.yatri.consumer": "https://assets.moving.tech/hyper/bundles/app/in.yatri.consumer/3.0.108/ios/v1-index_bundle.jsa"
+          }
+        },
+        "new": {
+          "assets": {
+            "in.yatri.consumer": {
+              "configuration": "https://assets.moving.tech/hyper/configs/yatrisathiconsumer/in.yatri.consumer/2.0.14/v1-configuration.jsa"
+            }
+          },
+          "package": {
+            "in.yatri.consumer": "https://assets.moving.tech/hyper/bundles/app/in.yatri.consumer/3.0.108/ios/v1-index_bundle.jsa"
+          }
+        }
+      }
+    }
+  ],
+  "patching": {
+    "maxage": 604800
+  },
+  "stagger": 100,
+  "variant_ids": [
+    "7260250378079277056-experimental"
+  ]
+}

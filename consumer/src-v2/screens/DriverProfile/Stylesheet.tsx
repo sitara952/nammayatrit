@@ -1,0 +1,158 @@
+import { StyleSheet } from 'react-native';
+export const ViewStyleSheet = StyleSheet.create({
+    _container: {
+        flexGrow: 1,
+        flexShrink: 1,
+        flexBasis: '0%',
+    },
+    _scrollViewContent: {
+        flexGrow: 1,
+    },
+    _profileContainer: {
+        alignItems: 'center',
+        paddingTop: 10,
+        paddingHorizontal: 20,
+    },
+    _avatarContainer: {
+        marginVertical: 10,
+    },
+    _avatar: {
+        width: 120,
+        height: 105,
+        resizeMode: 'cover',
+        borderRadius: 60,
+    },
+    _placeholderAvatar: {
+        width: 120,
+        height: 90,
+        borderRadius: 60,
+        backgroundColor: '#ECECEC',
+        borderWidth: 3,
+        borderColor: 'white',
+    },
+    _driverName: {
+        color: '#000',
+        marginTop: 5,
+        marginBottom: 5,
+    },
+    _endorsementsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 5,
+        columnGap: 8,
+    },
+    _heartIconContainer: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        backgroundColor: 'transparent',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    _heartIconText: {
+        fontSize: 11,
+        position: 'relative',
+        bottom: 1.5,
+    },
+    _endorsementsText: {
+        color: '#333',
+    },
+    _statsCard: {
+        flexDirection: 'row',
+        backgroundColor: 'white',
+        borderRadius: 15,
+        paddingVertical: 20,
+        paddingHorizontal: 10,
+        marginTop: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
+        elevation: 1,
+        width: '100%',
+    },
+    _statItem: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    _statValue: {
+        color: '#333',
+    },
+    _statLabel: {
+        color: '#888',
+        marginTop: 5,
+        textAlign: 'center',
+        flex: 1,
+        flexWrap: 'wrap',
+    },
+    _divider: {
+        width: 1,
+        height: '100%',
+        backgroundColor: '#EEEEEE',
+        marginHorizontal: 8,
+    },
+    _whiteContainer: {
+        backgroundColor: 'white',
+        width: '100%',
+        flex: 1,
+        marginTop: 15,
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        // padding: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5,
+        elevation: 5,
+        minHeight: 200,
+    },
+    _sectionTitle: {
+        color: '#333',
+        marginBottom: 15,
+    },
+    _detailsText: {
+        color: '#666',
+        lineHeight: 22,
+    },
+    _showMoreText: {
+        color: '#4169E1',
+        marginTop: 8,
+        marginBottom: 20,
+    },
+    _infoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    _infoIcon: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 10,
+    },
+    _infoText: {
+        color: '#555',
+        flex: 1,
+    },
+    _loadingText: {
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    _errorText: {
+        textAlign: 'center',
+        marginTop: 20,
+        color: 'red',
+    },
+    _content: {
+        padding: 20,
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    _personalDetails: {
+        padding: 18,
+    },
+});

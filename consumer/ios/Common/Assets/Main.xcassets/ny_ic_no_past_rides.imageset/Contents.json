@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "ny_ic_no_past_rides.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "ny_ic_no_past_rides 1.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "ny_ic_no_past_rides 2.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

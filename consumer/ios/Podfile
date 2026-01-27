@@ -1,0 +1,157 @@
+# Add the private spec repo for AppMonitor SDK
+source 'https://github.com/nammayatri/ny-cocoapods-specs.git'
+source 'https://cdn.cocoapods.org/' # Public CocoaPods specs (required for other dependencies)
+
+def node_require(script)
+  # Resolve script with node to allow for hoisting
+  require Pod::Executable.execute_command('node', ['-p',
+    "require.resolve(
+      '#{script}',
+      {paths: [process.argv[1]]},
+    )", __dir__]).strip
+end
+
+def common_pods
+
+
+  rn_maps_path = '../node_modules/react-native-maps'
+  pod 'FirebaseFirestore'
+  pod 'FirebaseMessaging', :modular_headers => true
+  pod 'FirebaseCoreExtension', :modular_headers => true
+  pod 'ReactNativeBlur', :path => '../node_modules/@sbaiahmed1/react-native-blur', :modular_headers => true
+  pod 'FLEX', :configurations => ['Debug']
+  pod 'Firebase/Core'
+  pod 'MobilityCustomer', :path => '../../nammayatri-ios/mobility-customer/'
+  pod 'react-native-maps/Google', :path => rn_maps_path
+  pod 'clevertap-react-native', :path => '../node_modules/clevertap-react-native', :modular_headers => true
+  config = use_native_modules!
+  use_frameworks! :linkage => :static
+  $RN_NEW_ARCH_ENABLED = "1"
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :new_arch_enabled => true,
+    :hermes_enabled => true,
+    :fabric_enabled => true,
+    # An absolute path to your application root.
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+end
+
+
+
+node_require('react-native/scripts/react_native_pods.rb')
+node_require('react-native-permissions/scripts/setup.rb')
+
+
+platform :ios, '15.1'
+prepare_react_native_project!
+
+# Uncomment the next line if
+setup_permissions([
+  # 'AppTrackingTransparency',
+  # 'Bluetooth',
+  'Calendars',
+  'CalendarsWriteOnly',
+  'Camera',
+  # 'Contacts',
+  # 'FaceID',
+  'LocationAccuracy',
+  'LocationAlways',
+  'LocationWhenInUse',
+  # 'MediaLibrary',
+  'Microphone',
+  # 'Motion',
+  # 'Notifications',
+  # 'PhotoLibrary',
+  # 'PhotoLibraryAddOnly',
+  # 'Reminders',
+  # 'Siri',
+  # 'SpeechRecognition',
+  # 'StoreKit',
+])
+
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => linkage.to_sym
+end
+
+target 'Bridge' do
+
+  common_pods
+
+  target 'NammayatriTests' do
+    inherit! :complete
+    # Pods for testing
+  end
+
+  post_install do |installer|
+    # Un-Comment the below piece of code in case macOS is upgraded and buil is failing
+     installer.pods_project.targets.each do |target|
+           if target.name == 'BoringSSL-GRPC'
+             target.source_build_phase.files.each do |file|
+               if file.settings && file.settings['COMPILER_FLAGS']
+                 flags = file.settings['COMPILER_FLAGS'].split
+                 flags.reject! { |flag| flag == '-GCC_WARN_INHIBIT_ALL_WARNINGS' }
+                 file.settings['COMPILER_FLAGS'] = flags.join(' ')
+               end
+             end
+           end
+         end
+    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
+    react_native_post_install(
+      installer,
+      # config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
+    )
+    fuse_path = "./Pods/HyperSDK/Fuse.rb"
+    clean_assets = true # Pass true to re-download all the assets
+    if File.exist?(fuse_path)
+      if system("ruby", fuse_path.to_s, clean_assets.to_s)
+      end
+    end
+    local_assets_path = "./local_assets.rb"
+    local_assets = false
+    if File.exist?(local_assets_path)
+      if system("ruby", local_assets_path.to_s, local_assets.to_s)
+      end
+    end
+  end
+end
+
+target 'NammaYatri' do
+  common_pods
+end
+
+target 'ManaYatri' do
+  common_pods
+end
+
+target 'Yatri' do
+  common_pods
+end
+
+target 'YatriSathi' do
+  common_pods
+end
+
+target 'OdishaYatri' do
+  common_pods
+end
+
+target 'KeralaSavaari' do
+  common_pods
+end
+
+target 'Cumta' do
+  common_pods
+end
+
+target 'BharatTaxi' do
+  common_pods
+end
+
+target 'Lynx' do
+  common_pods
+end

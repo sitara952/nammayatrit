@@ -1,0 +1,13 @@
+// open ReactQuery
+// open <CAP-API-NAME>
+//
+// module Keys = {
+//  let all = ["<API-NAME>"]
+// }
+// let use<CAP-API-NAME> = (~<REACT-QUERY-FUNCTION>Key) => {
+//   use<CAP-REACT-QUERY-FUNCTION>({
+//     <REACT-QUERY-FUNCTION>Key,
+//     <QUERY-FN-CODE>,
+//   })
+// }
+// <OUT=../src/api/integrations/<CAP-API-NAME>RQ.res>

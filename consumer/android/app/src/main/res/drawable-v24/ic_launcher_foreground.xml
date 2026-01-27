@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="265"
+    android:viewportHeight="265">
+  <group android:scaleX="0.67"
+      android:scaleY="0.67"
+      android:translateX="43.725"
+      android:translateY="43.725">
+    <path
+        android:pathData="M0,0h264v264h-264z">
+      <aapt:attr name="android:fillColor">
+        <gradient 
+            android:startX="403.3"
+            android:startY="-130.26"
+            android:endX="132.8"
+            android:endY="131.2"
+            android:type="linear">
+          <item android:offset="0" android:color="#FFCA6DF6"/>
+          <item android:offset="0.25" android:color="#FFAB59F8"/>
+          <item android:offset="0.56" android:color="#FF8D45FA"/>
+          <item android:offset="0.82" android:color="#FF7A39FB"/>
+          <item android:offset="1" android:color="#FF7435FC"/>
+        </gradient>
+      </aapt:attr>
+    </path>
+    <path
+        android:pathData="M86.4,114.36H48.88V209.88H86.4V114.36Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M217.26,114.36H179.74V209.88H217.26V114.36Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M133.09,198.52C86.69,198.52 48.88,160.76 48.88,114.31H86.4C86.4,140.04 107.32,161.01 133.09,161.01C158.87,161.01 179.79,140.08 179.79,114.31H217.31C217.31,160.71 179.55,198.52 133.09,198.52Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M67.47,99.51C79.85,99.51 89.89,89.47 89.89,77.08C89.89,64.7 79.85,54.66 67.47,54.66C55.08,54.66 45.04,64.7 45.04,77.08C45.04,89.47 55.08,99.51 67.47,99.51Z"
+        android:fillColor="#ffffff"/>
+    <path
+        android:pathData="M197.07,99.51C209.45,99.51 219.49,89.47 219.49,77.08C219.49,64.7 209.45,54.66 197.07,54.66C184.68,54.66 174.64,64.7 174.64,77.08C174.64,89.47 184.68,99.51 197.07,99.51Z"
+        android:fillColor="#ffffff"/>
+  </group>
+</vector>

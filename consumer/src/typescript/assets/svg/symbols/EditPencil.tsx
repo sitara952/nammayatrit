@@ -1,0 +1,16 @@
+import * as React from 'react';
+import Svg, { Path } from 'react-native-svg';
+import { ViewStyle } from 'react-native';
+
+interface EditPencilProps {
+    style?: ViewStyle;
+}
+
+export const EditPencil: React.FC<EditPencilProps> = ({ style }) => {
+    return (
+        <Svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={style}>
+            <Path d="M17.2583 5.8668C17.5833 5.5418 17.5833 5.00013 17.2583 4.6918L15.3083 2.7418C15 2.4168 14.4583 2.4168 14.1333 2.7418L12.6 4.2668L15.725 7.3918M2.5 14.3751V17.5001H5.625L14.8417 8.27513L11.7167 5.15013L2.5 14.3751Z" fill="#606060" />
+        </Svg>
+    );
+}
+

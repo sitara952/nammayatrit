@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_id">manaYatri</string>
+    <string name="ota_base_url">https://airborne.juspay.in/release/movingtech/manayatri</string>
+</resources>

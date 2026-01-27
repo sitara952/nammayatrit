@@ -1,0 +1,8 @@
+{
+   "images" : {
+      "ny_ic_no_past_rides" : true,
+      "splash_background" : true,
+      "splash_footer" : false,
+      "splash_logo" : true
+   }
+}

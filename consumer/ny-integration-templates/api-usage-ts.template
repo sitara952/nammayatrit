@@ -1,0 +1,26 @@
+import {api, RtkExtraOptions} from '../../../typescript/state/api';
+<TS-IMPORTS>
+
+export type <TS-API-TYPE-WITH-PARAMS> = {
+  <INPUTS-TS-FIELDS>
+};
+
+export const apiCall = (rtkExtraOptions: RtkExtraOptions) => api.injectEndpoints({
+  endpoints: build => ({
+    <API-NAME>: build.<RTK-QUERY-FUNCTION><<RESPONSE-TYPE>, <TS-API-TYPE-WITH-PARAMS>>({
+      query: (<INPUTS-TS>) => ({
+        url: <API-ENDPOINT-TS>,
+        method: '<METHOD-RTK-TS>',
+        <REQUEST-BODY-TS>
+      }),
+      transformResponse(baseQueryReturnValue: any, _meta, _arg) {
+        <DECODE-LOGIC-TS>
+      },
+      ...rtkExtraOptions,
+    }),
+  }),
+  overrideExisting: false,
+});
+
+export const {use<CAP-API-NAME><CAP-RTK-QUERY-FUNCTION>} = apiCall({onQueryStarted: undefined});
+// <OUT=../src/api/integrations/rtk/<CAP-API-NAME>.ts>

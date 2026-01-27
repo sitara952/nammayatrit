@@ -1,0 +1,44 @@
+open Enums
+open LatLong
+open Utils
+
+@genType
+type getRoutesReq = {
+  calcPoints: bool,
+  mode: option<TravelMode.travelMode>,
+  waypoints: array<latLong>,
+}
+
+let decodeGetRoutesReq = data => {
+  try {
+    Ok(
+      data
+      ->JSON.Decode.object
+      ->Option.getOr(Dict.make())
+      ->(
+        dict => {
+          calcPoints: getOptionBool(dict, "calcPoints")->Option.getExn(
+            ~message="calcPoints not found",
+          ),
+          mode: TravelMode.decodeTravelModeResult(dict, "mode")->Result.mapOr(None, x => Some(x)),
+          waypoints: dict
+          ->Dict.get("waypoints")
+          ->Option.flatMap(x => Js.Json.decodeArray(x))
+          ->Option.getExn(~message="waypoints is not of array")
+          ->Array.map(x =>
+            decodeLatLong(x)->Utils.getResultExn(~message="waypoints is coming as undefined")
+          ),
+        }
+      ),
+    )
+  } catch {
+  | err => {
+      Console.log2("GetRoutesReq ERROR", err)
+      Error(err)
+    }
+  }
+}
+
+let toJson = (req: getRoutesReq) => {
+  req->asJson
+}

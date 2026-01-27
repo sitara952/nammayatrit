@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#4CAF50"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center">
+    <!-- Center icon -->
+    <ImageView
+        android:id="@+id/center_icon"
+        android:layout_width="320dp"
+        android:layout_height="130dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ny_ic_splash_brand"
+        />
+    </LinearLayout>
+
+    <!-- Footer image (logos, text, etc.) -->
+    <ImageView
+        android:id="@+id/footer_image"
+        android:layout_width="275dp"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="12dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/splash_footer" />
+</LinearLayout>

@@ -1,0 +1,36 @@
+{
+    "name": "Nammayatri",
+    "jsx": {
+        "version": 4
+    },
+    "package-specs": {
+        "module": "esmodule",
+        "in-source": true
+    },
+    "gentypeconfig": {
+        "module": "esmodule",
+        "moduleResolution": "bundler",
+        "generatedFileExtension": ".gen.tsx",
+        "shims": {
+            "ReactNative": "ReactNative",
+            "ReactQuery": "ReactQuery"
+        }
+    },
+    "bsc-flags": ["-open RescriptCore"],
+    "suffix": ".bs.js",
+    "sources": [
+        {
+            "dir": "src",
+            "subdirs": true
+        }
+    ],
+    "bs-dependencies": [
+        "@rescript/react",
+        "rescript-react-native",
+        "rescript-react-navigation",
+        "@rescript/core",
+        "@glennsl/rescript-fetch",
+        "rescript-gesture-handler",
+        "@rescriptbr/react-query"
+    ]
+}

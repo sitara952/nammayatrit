@@ -1,0 +1,11 @@
+open Utils
+
+let <API-NAME>ApiCall = async (<INPUTS>) => {
+  let data = await ApiCall.call<METHOD>API'(
+    ~url=<API-ENDPOINT>,
+    <REQUEST-BODY-CODE>
+  )
+  <CAP-RESPONSE-TYPE>.decode<CAP-RESPONSE-TYPE>(data)
+}
+
+<OUT=../src/readOnly/api/integrations/<CAP-API-NAME>.res>

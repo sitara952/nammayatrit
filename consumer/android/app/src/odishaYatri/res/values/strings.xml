@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_id">odishaYatri</string>
+    <string name="lottie_asset_folder">raw/</string>
+    <string name="ota_base_url">https://airborne.juspay.in/release/movingtech/odishayatri</string>
+</resources>

@@ -1,0 +1,16 @@
+import { useConfigContext } from '@/typescript/context/ConfigContext';
+import * as React from 'react';
+import Svg, { Path } from 'react-native-svg';
+
+export const Home = ({ fillColor }: { fillColor: string }) => {
+    const configManager = useConfigContext();
+    const themeColors = configManager.get('themeColors');
+    return (
+        <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none">
+            <Path
+                d="M20.1929 8.52298L12.7977 3.3989C12.3191 3.06104 11.6809 3.06104 11.1929 3.3989L3.80709 8.52298C3.30031 8.87022 3 9.45208 3 10.0621V18.9776C3 20.01 3.84463 20.8546 4.87696 20.8546H8.29301C8.80918 20.8546 9.23149 20.4323 9.23149 19.9161V15.1111C9.23149 14.5949 9.65381 14.1726 10.17 14.1726H13.83C14.3462 14.1726 14.7685 14.5949 14.7685 15.1111V19.9161C14.7685 20.4323 15.1908 20.8546 15.707 20.8546H19.123C20.1554 20.8546 21 20.01 21 18.9776V10.0621C21 9.44269 20.6997 8.87022 20.1929 8.52298Z"
+                fill={fillColor ?? themeColors.APP_THEME_COLOR}
+            />
+        </Svg>
+    );
+};

@@ -1,0 +1,76 @@
+buildscript {
+    ext {
+        buildToolsVersion = "35.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 35
+        targetSdkVersion = 35
+        ndkVersion = "28.2.13676358"
+        kotlinVersion = "2.0.21"
+        kotlin_version = kotlinVersion
+
+        // Set REACT_NATIVE_NODE_MODULES_DIR to bypass node command execution in react-native-svg
+        // This fixes the "A problem occurred starting process 'command 'node''" error
+        REACT_NATIVE_NODE_MODULES_DIR = file("${rootDir}/../node_modules/react-native").absolutePath
+    }
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://maven.juspay.in/jp-build-packages/hyper-sdk/" }
+    }
+    dependencies {
+        classpath 'in.juspay:hypersdk.plugin:2.0.8'
+        classpath("com.android.tools.build:gradle")
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("com.mobility.movingtech:copy-assets-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath("com.google.gms:google-services:4.4.1")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:3.0.2")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url "https://maven.juspay.in/jp-build-packages/hyper-sdk/"
+        }
+        maven { url 'https://www.jitpack.io' }
+    }
+
+    configurations.all {
+        exclude group: 'com.google.firebase', module: 'firebase-dynamic-links'
+    }
+}
+
+apply plugin: "com.facebook.react.rootproject"
+//apply plugin: "com.mobility.movingtech.rootproject"
+
+task clean(type: Delete) {
+    doFirst {
+        println "🧹 Starting custom clean process..."
+        println "📁 Cleaning build directories..."
+    }
+
+    delete rootProject.buildDir
+    delete file("${rootDir}/../node_modules/.cache")
+    delete file("${rootDir}/../.metro-cache")
+
+    delete file("${rootDir}/build")
+    delete file("${rootDir}/app/build")
+    delete file("${rootDir}/app/.cxx")
+
+    // Clean React Native specific caches
+    subprojects { subproject ->
+        delete subproject.buildDir
+    }
+
+    doLast {
+        println "✅ Custom clean completed successfully!"
+        println "🔄 Additional cleanup tasks:"
+        println "   - Cleared Metro cache"
+        println "   - Cleared Node modules cache"
+        println "   - Cleaned Android build directories"
+        println "   - Cleaned all subproject build directories"
+    }
+}

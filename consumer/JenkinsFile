@@ -1,0 +1,978 @@
+def isProdDeployBranch(branch) {
+  (branch =~ /(main|hotfix-|ui_hotpush)/)
+}
+
+def isVersionBumpCandidateBranch(branch) {
+  (branch =~ /(main|hotfix-|ui_hotpush)/)
+}
+
+def isSandboxCandidate(branch) {
+  (branch =~ /(main|devqa-bkn-|ui_hotpush)/)
+}
+
+def getRepoNameMessage() {
+  return "Repo : *${GIT_REPO_NAME}*\n"
+}
+
+def getCurrentBranchMessage() {
+  return "Branch : *${env.BRANCH_NAME}*\n"
+}
+
+def getGitCommit(){
+  return "Git Commit: *${env.CUSTOM_GIT_COMMIT}*\n"
+}
+
+def getDescription(){
+  return "Build Description: *${params.changelog}*\n"
+}
+
+def getBuildID(){
+  return "Build ID: *${env.BUILD_ID}*\n"
+}
+
+def getPackageVersion(){
+  return "Package Version: *${env.PACKAGE_VERSION}*\n"
+}
+
+def getPRAuthorMessage() {
+  return "Triggered By : *${env.BUILD_USER}*\n"
+}
+
+def getS3Path(isProd, version = null){
+  def versionToUse = version ?: PACKAGE_VERSION
+  if(isProd){
+    return "${S3_BASE_PATH}/${APP_NAME}/${versionToUse}"
+  } else {
+    return "${S3_BASE_PATH}/${APP_NAME}/${BRANCH_NAME}/${versionToUse}"
+  }
+}
+
+def findAvailableVersion(env, isProd, maxAttempts = 20) {
+  def currentVersion = env.PACKAGE_VERSION
+  echo "Starting version search from: ${currentVersion}"
+  
+  // Parse current version (x.y.z format)
+  def versionParts = currentVersion.split('\\.')
+  def major = versionParts[0] as Integer
+  def minor = versionParts[1] as Integer  
+  def patch = versionParts[2] as Integer
+  
+  for (int i = 0; i < maxAttempts; i++) {
+    def testVersion = "${major}.${minor}.${patch + i}"
+    echo "Checking version: ${testVersion}"
+    
+    // Check if this version exists in S3
+    def s3Path = getS3Path(isProd, testVersion)
+    def s3CodePathPrefix = "s3://${env.S3_BUCKET}/${s3Path}"
+    
+    def packageExists = sh(
+      returnStdout: true,
+      script: """
+        set +x;
+        aws s3 ls "${s3CodePathPrefix}/" | wc -l | tr -d '\\n';
+      """
+    )
+    
+    if (packageExists.toInteger() == 0) {
+      echo "Found available version: ${testVersion}"
+      return testVersion
+    } else {
+      echo "Version ${testVersion} already exists in S3, trying next..."
+    }
+  }
+  
+  error "Could not find available version after ${maxAttempts} attempts"
+}
+
+def findAvailableVersionWithValidation(env, maxAttempts = 20) {
+  def currentVersion = env.PACKAGE_VERSION
+  echo "Starting version validation from: ${currentVersion}"
+  
+  // Parse current version (x.y.z format)
+  def versionParts = currentVersion.split('\\.')
+  def major = versionParts[0] as Integer
+  def minor = versionParts[1] as Integer  
+  def patch = versionParts[2] as Integer
+  
+  for (int i = 0; i < maxAttempts; i++) {
+    def testVersion = "${major}.${minor}.${patch + i}"
+    echo "Checking version: ${testVersion}"
+    
+    // Check Git tag (remote check for reliability across workspaces)
+    def gitTagExists = sh(
+      returnStdout: true,
+      script: "git ls-remote --tags origin refs/tags/v${testVersion}-consumer-bundle | wc -l | tr -d '\\n'"
+    )
+    
+    // Check bundle URL - consider 403 and 404 as "not available"
+    def bundleUrl = "https://ny.assets.juspay.in/hyper/bundles/app/consumer/${testVersion}/android/react-native-bundle-${testVersion}.zip"
+    def bundleExists = sh(
+      returnStdout: true,
+      script: "curl -I -s -o /dev/null -w '%{http_code}' '${bundleUrl}' | tr -d '\\n'"
+    )
+    
+    // Consider version available if Git tag doesn't exist AND bundle URL returns 403/404
+    def isVersionAvailable = (gitTagExists.toInteger() == 0 && (bundleExists == "404" || bundleExists == "403"))
+    
+    if (isVersionAvailable) {
+      echo "Found available version: ${testVersion} (Git tag: ${gitTagExists}, Bundle: ${bundleExists})"
+      return testVersion
+    } else {
+      echo "Version ${testVersion} already exists (Git tag: ${gitTagExists}, Bundle: ${bundleExists}), trying next..."
+    }
+  }
+  
+  error "Could not find available version after ${maxAttempts} attempts"
+}
+
+def updatePackageVersion(env, newVersion) {
+  sh """
+    # Configure git
+    git config user.name "${env.GIT_AUTHOR_NAME}"
+    git config user.email "${env.GIT_AUTHOR_EMAIL}"
+    
+    # Update package.json with new version
+    npm version ${newVersion} --no-git-tag-version
+
+    # Update version.ts
+    echo "export const VERSION = '${newVersion}';" > src/version.ts
+    
+    # Update bundled_js_version in build.gradle
+    if grep -q 'resValue "string", "bundled_js_version"' android/app/build.gradle; then
+      # Update existing line
+      sed -i "s/resValue \\"string\\", \\"bundled_js_version\\", \\"[^\\"]*\\"/resValue \\"string\\", \\"bundled_js_version\\", \\"${newVersion}\\"/" android/app/build.gradle
+    else
+      # Add the line after versionName
+      sed -i "/versionName /a\\\\        resValue \\"string\\", \\"bundled_js_version\\", \\"${newVersion}\\"" android/app/build.gradle
+    fi
+    
+    # Verify the change was successful
+    if ! grep -q "resValue \\"string\\", \\"bundled_js_version\\", \\"${newVersion}\\"" android/app/build.gradle; then
+      echo "❌ Failed to update bundled_js_version in build.gradle"
+      exit 1
+    fi
+    echo "✅ Updated bundled_js_version to ${newVersion} in build.gradle"
+    
+    # Commit the version change
+    git add package.json src/version.ts android/app/build.gradle
+    git commit -m "chore: auto-increment version to ${newVersion} due to S3 conflict (package.json, version.ts, build.gradle) [skip ci]" --no-verify
+    
+    # Push the changes
+    git push origin ${env.BRANCH_NAME}
+    
+    echo "Updated package version to ${newVersion} and pushed to repository"
+  """
+}
+
+def uploadAssetsIndividually(env, platform, assetsDir, s3BasePath) {
+  if (fileExists(assetsDir)) {
+    echo "Uploading individual assets from ${assetsDir} to S3..."
+    
+    // Use AWS CLI to sync with relative paths
+    sh """
+      aws s3 sync ${assetsDir}/ s3://${S3_BUCKET}/${s3BasePath}/ \\
+        --metadata-directive REPLACE \\
+        --metadata '{"commit-id":"${env.CUSTOM_GIT_COMMIT}","version":"${PACKAGE_VERSION}","last-modified-by":"Jenkins","platform":"${platform}","type":"asset"}' \\
+        --exclude "*.map" \\
+        --exclude "*.bundle"
+    """
+    
+    // Count uploaded files
+    def uploadedCount = sh(
+      returnStdout: true,
+      script: "find ${assetsDir} -type f | wc -l | tr -d '\\n'"
+    ).trim()
+    
+    echo "Uploaded ${uploadedCount} individual asset files to ${s3BasePath}/"
+    return uploadedCount
+  } else {
+    echo "No assets directory found at ${assetsDir}"
+    return "0"
+  }
+}
+
+def uploadBundleIndividually(env, platform, bundleFile, bundleName, s3BasePath) {
+  if (fileExists(bundleFile)) {
+    def bundleS3Path = "${s3BasePath}/${bundleName}"
+    sh """
+      aws s3 cp ${bundleFile} s3://${S3_BUCKET}/${bundleS3Path} \\
+        --metadata '{"commit-id":"${env.CUSTOM_GIT_COMMIT}","version":"${PACKAGE_VERSION}","last-modified-by":"Jenkins","platform":"${platform}","type":"bundle","contains":"hermes-bytecode"}'
+    """
+    echo "Uploaded individual bundle: s3://${S3_BUCKET}/${bundleS3Path}"
+    return bundleS3Path
+  }
+  return null
+}
+
+def setupAWS(env, isProd){
+  if (isProd) {
+      env.ASSUMED_ROLE = "arn:aws:iam::980691203742:role/ny-hyper-sdk-jenkins"
+      env.S3_BUCKET = "hyper-sdk-assets-prod-buffer-ny"
+      env.CF_DISTRIBUTION_ID = "E2ECP49Q9319IB"
+  } else {
+      env.S3_BUCKET = "beta-moving-tech-assets"
+      env.CF_DISTRIBUTION_ID = "E2UYZKLVHOVJDR"
+  }
+
+  env.S3_BASE_PATH = "hyper/bundles/app"
+  
+  if (isProd) {
+    env.AWS_STS_RESPONSE = """${sh(
+            returnStdout: true,
+            script: '''
+            set +x;
+            unset AWS_SECRET_ACCESS_KEY;
+            unset AWS_SESSION_TOKEN;
+            unset AWS_ACCESS_KEY_ID;
+            aws sts assume-role --role-arn ${ASSUMED_ROLE} --role-session-name s3-bucket-access;
+            '''
+        )}"""
+    env.AWS_SECRET_ACCESS_KEY = """${sh(
+            returnStdout: true,
+            script: '''
+            set +x;
+            echo ${AWS_STS_RESPONSE} | jq '.Credentials.SecretAccessKey' | xargs | tr -d '\n';
+            '''
+        )}"""
+    env.AWS_SESSION_TOKEN = """${sh(
+            returnStdout: true,
+            script: '''
+            set +x;
+            echo ${AWS_STS_RESPONSE} | jq '.Credentials.SessionToken' | xargs | tr -d '\n';
+            '''
+        )}"""
+    env.AWS_ACCESS_KEY_ID = """${sh(
+            returnStdout: true,
+            script: '''
+            set +x;
+            echo ${AWS_STS_RESPONSE} | jq '.Credentials.AccessKeyId' | xargs | tr -d '\n';
+            '''
+        )}"""
+  }
+}
+
+
+
+def s3Upload(env, isProd){
+  dir('consumer') {
+    env.PACKAGE_VERSION = """${sh(
+            returnStdout: true,
+            script: '''
+            set +x;
+            cat package.json | jq -r '.version' | tr -d '\n';
+            '''
+        )}"""
+
+  // Check if version exists in S3 and find available version if needed
+  def s3Path = getS3Path(isProd)
+  env.S3_CODE_PATH_PREFIX = "s3://${S3_BUCKET}/${s3Path}"
+  
+  if (isProd) {
+    env.S3_BUCKET_DOMAIN = "${S3_BUCKET}.s3.amazonaws.com"
+    env.PACKAGE_EXISTS = """${sh(
+          returnStdout: true,
+          script: '''
+          set +x;
+          aws s3 ls "${S3_CODE_PATH_PREFIX}/" | wc -l | tr -d '\n';
+          '''
+      )}"""
+
+    if (PACKAGE_EXISTS.toInteger() > 0) {
+      echo "Version ${PACKAGE_VERSION} already exists in S3. Finding available version..."
+      
+      // Validate and parse maxAttempts parameter
+      def maxAttempts
+      try {
+        maxAttempts = params.maxAttempts.toInteger()
+        if (maxAttempts <= 0) {
+          echo "Invalid maxAttempts value: ${params.maxAttempts}. Using default value: 20"
+          maxAttempts = 20
+        }
+      } catch (Exception e) {
+        echo "Error parsing maxAttempts parameter: ${e.message}. Using default value: 20"
+        maxAttempts = 20
+      }
+      
+      echo "Using max attempts: ${maxAttempts}"
+      def availableVersion = findAvailableVersion(env, isProd, maxAttempts)
+      
+      if (availableVersion != env.PACKAGE_VERSION) {
+        echo "Updating package version from ${env.PACKAGE_VERSION} to ${availableVersion}"
+        updatePackageVersion(env, availableVersion)
+        env.PACKAGE_VERSION = availableVersion
+        s3Path = getS3Path(isProd, availableVersion)
+        env.S3_CODE_PATH_PREFIX = "s3://${S3_BUCKET}/${s3Path}"
+      }
+    }
+  } else {
+    env.S3_BUCKET_DOMAIN = "${S3_BUCKET}.s3.amazonaws.com"
+  }
+  
+  env.S3_PATH = s3Path
+
+  // Upload Android bundle if built
+  if (params.platform == "android" || params.platform == "both") {
+    def androidBundleFile = "android/app/build/generated/assets/react/release/index.android.bundle"
+    def androidAssetsDir = "android/app/build/generated/res/react/release"
+    
+    if (fileExists(androidBundleFile)) {
+      // Create temporary directory for packaging
+      sh ("mkdir -p temp_package_android")
+      
+      // Copy bundle to temp directory (now contains Hermes bytecode)
+      sh ("cp ${androidBundleFile} temp_package_android/")
+      
+      // Upload individual bundle to S3
+      def androidBundleS3Path = uploadBundleIndividually(env, "android", androidBundleFile, "index.android.bundle", "${s3Path}/android")
+      if (androidBundleS3Path) {
+        env.UPLOADED_FILES += "\nAndroid Bundle: s3://${S3_BUCKET}/${androidBundleS3Path}"
+      }
+      
+      // Upload Hermes source map separately to S3
+      def hermesSourceMapFile = "android/app/build/generated/assets/react/release/index.android.bundle.map"
+      if (fileExists(hermesSourceMapFile)) {
+        def sourceMapS3Path = "${s3Path}/android/sourcemaps/index.android.bundle.map"
+        sh ("aws s3 cp ${hermesSourceMapFile} s3://${S3_BUCKET}/${sourceMapS3Path} --metadata '{\"commit-id\":\"${env.CUSTOM_GIT_COMMIT}\", \"version\":\"${PACKAGE_VERSION}\",\"last-modified-by\":\"Jenkins\", \"platform\":\"android\", \"type\":\"source-map\"}'")
+        env.UPLOADED_FILES += "\nAndroid Source Map: s3://${S3_BUCKET}/${sourceMapS3Path}"
+        echo "Uploaded Android source map to S3"
+      }
+      
+      // Copy assets to temp directory if they exist
+      echo "Checking for Android assets in: ${androidAssetsDir}"
+      echo "Current working directory: ${sh(returnStdout: true, script: 'pwd').trim()}"
+      
+      // List contents of the assets directory to debug
+      sh """
+        echo "=== Android Assets Directory Contents ==="
+        ls -la ${androidAssetsDir} || echo "Directory listing failed"
+        echo "=== End Android Assets Directory Contents ==="
+      """
+      
+      if (fileExists(androidAssetsDir)) {
+        echo "Android assets directory exists, copying assets..."
+        // Copy contents of release folder directly, not the folder itself
+        sh ("cp -r ${androidAssetsDir}/* temp_package_android/")
+        
+        // Upload individual assets to S3
+        def androidAssetsCount = uploadAssetsIndividually(env, "android", androidAssetsDir, "${s3Path}/android")
+        if (androidAssetsCount.toInteger() > 0) {
+          env.UPLOADED_FILES += "\nAndroid Assets: ${androidAssetsCount} files uploaded to s3://${S3_BUCKET}/${s3Path}/android/"
+        }
+        
+        // Verify assets were copied
+        sh """
+          echo "=== Assets copied to temp directory ==="
+          ls -la temp_package_android/
+          echo "=== End temp directory contents ==="
+        """
+      } 
+      
+      // Create zip file with bundle and assets
+      def zipFileName = "react-native-bundle-${PACKAGE_VERSION}.zip"
+      
+      // Debug: Show what's in temp directory before zipping
+      sh """
+        echo "=== Final Package Contents (Android) ==="
+        echo "Contents of temp_package_android:"
+        ls -la temp_package_android/
+        echo "Total files to be zipped:"
+        find temp_package_android -type f | wc -l
+        echo "=== End Package Contents ==="
+      """
+      
+      sh ("cd temp_package_android && zip -r ../${zipFileName} .")
+      
+      // Get zip file size for metadata
+      def zipSize = sh(returnStdout: true, script: "stat -f%z ${zipFileName} 2>/dev/null || stat -c%s ${zipFileName}").trim()
+      
+      // Upload zip file to S3
+      env.ANDROID_BUNDLE_S3_PATH = "${S3_CODE_PATH_PREFIX}/android/${zipFileName}"
+      sh ("aws s3 cp ${zipFileName} ${env.ANDROID_BUNDLE_S3_PATH} --metadata '{\"commit-id\":\"${env.CUSTOM_GIT_COMMIT}\", \"version\":\"${PACKAGE_VERSION}\",\"last-modified-by\":\"Jenkins\", \"zip-size\":\"${zipSize}\", \"platform\":\"android\", \"contains\":\"bundle+hermes-bytecode+assets\", \"source-map\":\"separate\"}'")
+      env.UPLOADED_FILES += "\nAndroid: ${env.ANDROID_BUNDLE_S3_PATH}"
+      
+      // Clean up temporary files
+      sh ("rm -rf temp_package_android ${zipFileName}")
+      
+      echo "Created and uploaded Android zip package: ${zipFileName} (${zipSize} bytes)"
+    } else {
+      error "Android React Native bundle not found at ${androidBundleFile}"
+    }
+  }
+
+  // Upload iOS bundle if built
+  if (params.platform == "ios" || params.platform == "both") {
+    def iosBundleFile = "ios/build/generated/assets/react/release/main.jsbundle"
+    def iosAssetsDir = "ios/build/generated/res/react/release"
+    
+    if (fileExists(iosBundleFile)) {
+      // Create temporary directory for packaging
+      sh ("mkdir -p temp_package_ios")
+      
+      // Copy bundle to temp directory (now contains Hermes bytecode)
+      sh ("cp ${iosBundleFile} temp_package_ios/")
+      
+      // Upload individual bundle to S3
+      def iosBundleS3Path = uploadBundleIndividually(env, "ios", iosBundleFile, "main.jsbundle", "${s3Path}/ios")
+      if (iosBundleS3Path) {
+        env.UPLOADED_FILES += "\niOS Bundle: s3://${S3_BUCKET}/${iosBundleS3Path}"
+      }
+      
+      // Upload Hermes source map separately to S3
+      def iosHermesSourceMapFile = "ios/build/generated/assets/react/release/main.jsbundle.map"
+      if (fileExists(iosHermesSourceMapFile)) {
+        def iosSourceMapS3Path = "${s3Path}/ios/main.jsbundle.map"
+        sh ("aws s3 cp ${iosHermesSourceMapFile} s3://${S3_BUCKET}/${iosSourceMapS3Path} --metadata '{\"commit-id\":\"${env.CUSTOM_GIT_COMMIT}\", \"version\":\"${PACKAGE_VERSION}\",\"last-modified-by\":\"Jenkins\", \"platform\":\"ios\", \"type\":\"source-map\"}'")
+        env.UPLOADED_FILES += "\niOS Source Map: s3://${S3_BUCKET}/${iosSourceMapS3Path}"
+        echo "Uploaded iOS source map to S3"
+      }
+      
+      // Copy assets to temp directory if they exist
+      if (fileExists(iosAssetsDir)) {
+        sh ("cp -r ${iosAssetsDir}/* temp_package_ios/")
+        
+        // Upload individual assets to S3
+        def iosAssetsCount = uploadAssetsIndividually(env, "ios", iosAssetsDir, "${s3Path}/ios")
+        if (iosAssetsCount.toInteger() > 0) {
+          env.UPLOADED_FILES += "\niOS Assets: ${iosAssetsCount} files uploaded to s3://${S3_BUCKET}/${s3Path}/ios/"
+        }
+      }
+      
+      // Create zip file with bundle and assets
+      def zipFileName = "react-native-bundle-${PACKAGE_VERSION}.zip"
+      sh ("cd temp_package_ios && zip -r ../${zipFileName} .")
+      
+      // Get zip file size for metadata
+      def zipSize = sh(returnStdout: true, script: "stat -f%z ${zipFileName} 2>/dev/null || stat -c%s ${zipFileName}").trim()
+      
+      // Upload zip file to S3
+      env.IOS_BUNDLE_S3_PATH = "${S3_CODE_PATH_PREFIX}/ios/${zipFileName}"
+      sh ("aws s3 cp ${zipFileName} ${env.IOS_BUNDLE_S3_PATH} --metadata '{\"commit-id\":\"${env.CUSTOM_GIT_COMMIT}\", \"version\":\"${PACKAGE_VERSION}\",\"last-modified-by\":\"Jenkins\", \"zip-size\":\"${zipSize}\", \"platform\":\"ios\", \"contains\":\"bundle+hermes-bytecode+assets\", \"source-map\":\"separate\"}'")
+      env.UPLOADED_FILES += "\niOS: ${env.IOS_BUNDLE_S3_PATH}"
+      
+      // Clean up temporary files
+      sh ("rm -rf temp_package_ios ${zipFileName}")
+      
+      echo "Created and uploaded iOS zip package: ${zipFileName} (${zipSize} bytes)"
+    } else {
+      error "iOS React Native bundle not found at ${iosBundleFile}"
+    }
+  }
+
+    // Invalidate CloudFront cache for non-prod
+//     if (!isProd) {
+//       env.INVALIDATE_PATH = "/${s3Path}/*"
+//       sh("aws cloudfront create-invalidation --distribution-id ${env.CF_DISTRIBUTION_ID} --paths ${env.INVALIDATE_PATH}")
+//     }
+  }
+}
+
+pipeline {
+  agent {
+      kubernetes {
+            label 'mobility-agent'
+      }
+  }
+
+  parameters {
+      string(defaultValue: "main", description: 'Branch from which bundle needs to be generated', name: 'branch')
+      string(defaultValue: "React Native Bundle Release", description: 'Changelog for this bundle', name: 'changelog')
+      choice(name: 'platform', choices: ['android', 'ios', 'both'], description: 'Platform to build bundle for')
+      string(defaultValue: "20", description: 'Maximum number of version increment attempts when version exists in S3', name: 'maxAttempts')
+  }
+
+  environment {
+      APP_NAME = "consumer"
+      AWS_REGION = "ap-south-1"
+      GIT_REPO_NAME = "ny-react-native"
+      CACHE_AGE = "86400"
+      GIT_AUTHOR_NAME = "Jenkins User"
+      GIT_AUTHOR_EMAIL = "namma.yatri.jenkins@gmail.com"
+      GIT_COMMITTER_NAME = "Jenkins User"
+      GIT_COMMITTER_EMAIL = "namma.yatri.jenkins@gmail.com"
+      NODE_VERSION = "18"
+      JAVA_VERSION = "17"
+  }
+
+  stages {
+
+    stage("Checkout & Setup") {
+      steps {
+          script {
+            env.FAILED_STAGE = env.STAGE_NAME
+            
+            // Store original GIT_COMMIT for reference
+            def originalGitCommit = env.GIT_COMMIT
+            echo "Original GIT_COMMIT: ${originalGitCommit}"
+            
+            // Checkout specific branch if provided
+            if (params.branch && params.branch != env.BRANCH_NAME) {
+              sh """
+                git fetch origin ${params.branch}
+                git checkout ${params.branch}
+                git pull origin ${params.branch}
+              """
+              echo "Checked out branch: ${params.branch}"
+              
+              // Debug: Check what HEAD points to immediately after checkout
+              sh """
+                echo "DEBUG: After checkout, HEAD is:"
+                git rev-parse HEAD
+                echo "DEBUG: Branch is:"
+                git branch --show-current
+                echo "DEBUG: Last commit message:"
+                git log -1 --pretty=format:'%s'
+              """
+
+              def currentCommit = sh(
+                returnStdout: true,
+                script: "git rev-parse HEAD | tr -d '\\n'"
+              ).trim()
+
+              echo "Current commit before update: ${currentCommit}"
+              echo "DEBUG: currentCommit length: ${currentCommit.length()}"
+              echo "DEBUG: currentCommit value: '${currentCommit}'"
+              
+              // Update GIT_COMMIT to reflect the current HEAD commit of the checked-out branch
+              env.CUSTOM_GIT_COMMIT = currentCommit
+              echo "DEBUG: After assignment, env.CUSTOM_GIT_COMMIT = '${env.CUSTOM_GIT_COMMIT}'"
+              env.BRANCH_NAME = sh(script: 'git branch --show-current', returnStdout: true).trim()
+
+              echo "Checked out branch: ${env.BRANCH_NAME}"
+              
+              // Show current branch and commit info
+              sh """
+                echo "Current branch: \$(git branch --show-current)"
+                echo "Current commit: \$(git rev-parse HEAD)"
+                echo "Commit message: \$(git log -1 --pretty=format:'%s')"
+              """
+            } else {
+              echo "Using current branch: ${env.BRANCH_NAME}"
+            }
+          
+          echo "Building for platform(s): ${params.platform}"
+        }
+      }
+    }
+
+    stage("Install Dependencies") {
+      steps {
+        dir('consumer') {
+          script {
+            env.FAILED_STAGE = env.STAGE_NAME
+            sh """
+              # Install yarn if not present
+              
+              # Install dependencies using yarn
+              git checkout ${params.branch}
+              git pull origin ${params.branch}
+              yarn install            
+            """
+            
+            // Refresh CUSTOM_GIT_COMMIT after git pull to capture the actual commit that will be bundled
+            env.CUSTOM_GIT_COMMIT = sh(
+              returnStdout: true,
+              script: "git rev-parse HEAD | tr -d '\\n'"
+            ).trim()
+            
+            echo "Refreshed CUSTOM_GIT_COMMIT after git pull: ${env.CUSTOM_GIT_COMMIT}"
+            
+            // Validate we got a valid commit hash
+            if (!env.CUSTOM_GIT_COMMIT || env.CUSTOM_GIT_COMMIT.length() != 40) {
+              error "Failed to get valid commit hash after git pull. Got: ${env.CUSTOM_GIT_COMMIT}"
+            }
+          }
+        }
+      }
+    }
+
+    stage("Version Bump") {
+      steps {
+        dir('consumer') {
+          script {
+            env.FAILED_STAGE = env.STAGE_NAME
+            
+              // Get current version first
+              env.CURRENT_VERSION = sh(
+                returnStdout: true,
+                script: "cat package.json | jq -r '.version' | tr -d '\\n'"
+              )
+              echo "Current version: ${env.CURRENT_VERSION}"
+              
+              // Set PACKAGE_VERSION for the validation function
+              env.PACKAGE_VERSION = env.CURRENT_VERSION
+              
+              // Find available version with validation
+              def availableVersion = findAvailableVersionWithValidation(env, params.maxAttempts.toInteger())
+              echo "Available version found: ${availableVersion}"
+              
+              sh """
+                # Configure git
+                git config user.name "${GIT_AUTHOR_NAME}"
+                git config user.email "${GIT_AUTHOR_EMAIL}"
+
+                git pull --rebase origin ${params.branch}
+                
+                # Track if any changes were made
+                CHANGES_MADE=false
+                
+                # Update to available version if different
+                if [ "${availableVersion}" != "${env.CURRENT_VERSION}" ]; then
+                  echo "Updating version from ${env.CURRENT_VERSION} to ${availableVersion}"
+                  npm version ${availableVersion} --no-git-tag-version
+                  NEW_VERSION=${availableVersion}
+                  CHANGES_MADE=true
+                else
+                  echo "Current version ${env.CURRENT_VERSION} is available, using it"
+                  NEW_VERSION=${env.CURRENT_VERSION}
+                fi
+                
+                # Check if version.ts needs updating
+                CURRENT_VERSION_TS=\$(cat src/version.ts 2>/dev/null || echo "")
+                EXPECTED_VERSION_TS="export const VERSION = '\$NEW_VERSION';"
+                
+                if [ "\$CURRENT_VERSION_TS" != "\$EXPECTED_VERSION_TS" ]; then
+                  echo "Updating version.ts from '\$CURRENT_VERSION_TS' to '\$EXPECTED_VERSION_TS'"
+                  echo "\$EXPECTED_VERSION_TS" > src/version.ts
+                  CHANGES_MADE=true
+                else
+                  echo "version.ts already contains correct version: \$NEW_VERSION"
+                fi
+                
+                # Update bundled_js_version in build.gradle
+                CURRENT_BUNDLED_VERSION=\$(grep 'resValue "string", "bundled_js_version"' android/app/build.gradle | sed -n 's/.*bundled_js_version", "\\([^"]*\\)".*/\\1/p')
+                if [ "\$CURRENT_BUNDLED_VERSION" != "\$NEW_VERSION" ]; then
+                  echo "Updating bundled_js_version in build.gradle from '\$CURRENT_BUNDLED_VERSION' to '\$NEW_VERSION'"
+                  
+                  if grep -q 'resValue "string", "bundled_js_version"' android/app/build.gradle; then
+                    # Update existing line
+                    sed -i "s/resValue \\"string\\", \\"bundled_js_version\\", \\"[^\\"]*\\"/resValue \\"string\\", \\"bundled_js_version\\", \\"\$NEW_VERSION\\"/" android/app/build.gradle
+                  else
+                    # Add the line after versionName
+                    sed -i "/versionName /a\\\\        resValue \\"string\\", \\"bundled_js_version\\", \\"\$NEW_VERSION\\"" android/app/build.gradle
+                  fi
+                  
+                  # Verify the change was successful
+                  if ! grep -q "resValue \\"string\\", \\"bundled_js_version\\", \\"\$NEW_VERSION\\"" android/app/build.gradle; then
+                    echo "❌ Failed to update bundled_js_version in build.gradle"
+                    exit 1
+                  fi
+                  
+                  CHANGES_MADE=true
+                else
+                  echo "build.gradle already contains correct bundled_js_version: \$NEW_VERSION"
+                fi
+
+                echo "Version validated and set to: \$NEW_VERSION"
+                echo "Version will be included in bundle via Metro bundler"
+                
+                # Only commit if changes were made
+                if [ "\$CHANGES_MADE" = "true" ]; then
+                  echo "Changes detected, committing version update..."
+                  git add package.json src/version.ts android/app/build.gradle
+                  git commit -m "chore: bump version to \$NEW_VERSION (package.json, version.ts, build.gradle) [skip ci]" --no-verify
+                  
+                  # Push the changes
+                  git push origin ${params.branch}
+                  echo "Version change committed and pushed to repository"
+                else
+                  echo "No version changes needed, skipping commit"
+                fi
+                
+                echo "Version bump stage completed successfully"
+              """
+          }
+        }
+      }
+    }
+
+    stage("Generate React Native Bundle") {
+      steps {
+        dir('consumer') {
+          script {
+            env.FAILED_STAGE = env.STAGE_NAME
+            
+            // Get package version for environment variables
+            env.PACKAGE_VERSION = """${sh(
+              returnStdout: true,
+              script: '''
+              set +x;
+              cat package.json | jq -r '.version' | tr -d '\n';
+              '''
+            )}"""
+            
+            // Build for Android
+            if (params.platform == "android" || params.platform == "both") {
+              sh """
+                # Get package version and set as environment variable for transform-inline-environment-variables
+                export PACKAGE_VERSION=${env.PACKAGE_VERSION}
+                export GIT_COMMIT_SHORT=\$(echo ${env.CUSTOM_GIT_COMMIT} | cut -c1-7)
+                export BUILD_DATE=\$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+                
+                echo "Setting environment variables for Metro bundle (Android):"
+                echo "PACKAGE_VERSION: \$PACKAGE_VERSION"
+                echo "GIT_COMMIT_SHORT: \$GIT_COMMIT_SHORT"
+                echo "BUILD_DATE: \$BUILD_DATE"
+                
+                # Create bundle directory
+                mkdir -p android/app/build/generated/assets/react/release
+                
+                # Generate React Native bundle for Android
+                PACKAGE_VERSION=\$PACKAGE_VERSION \\
+                GIT_COMMIT_SHORT=\$GIT_COMMIT_SHORT \\
+                BUILD_DATE=\$BUILD_DATE \\
+                npx react-native bundle \\
+                  --platform android \\
+                  --dev false \\
+                  --entry-file index.js \\
+                  --bundle-output android/app/build/generated/assets/react/release/index.android.bundle \\
+                  --assets-dest android/app/build/generated/res/react/release \\
+                  --sourcemap-output android/app/build/generated/assets/react/release/index.android.bundle.map \\
+                  --minify true \\
+                  --reset-cache
+                
+                # Debug: Check what was generated
+                echo "=== Bundle Generation Debug ==="
+                echo "Bundle output directory:"
+                ls -la android/app/build/generated/assets/react/release/ || echo "Bundle directory not found"
+                echo "Assets output directory:"
+                ls -la android/app/build/generated/res/react/release/ || echo "Assets directory not found"
+                echo "=== End Bundle Generation Debug ==="
+                
+                # Verify bundle was created
+                if [ -f "android/app/build/generated/assets/react/release/index.android.bundle" ]; then
+                  echo "Android bundle generated successfully with version \$PACKAGE_VERSION"
+                  echo "Bundle size: \$(du -h android/app/build/generated/assets/react/release/index.android.bundle | cut -f1)"
+                  ls -la android/app/build/generated/assets/react/release/
+                  
+                  # Convert JS bundle to Hermes bytecode
+                  echo "Converting JavaScript bundle to Hermes bytecode..."
+                  node_modules/react-native/sdks/hermesc/linux64-bin/hermesc \\
+                    -w \\
+                    -emit-binary \\
+                    -max-diagnostic-width=80 \\
+                    -out android/app/build/generated/assets/react/release/index.android.bundle.hbc \\
+                    android/app/build/generated/assets/react/release/index.android.bundle \\
+                    -output-source-map
+                  
+                  # Replace original bundle with Hermes bytecode
+                  mv android/app/build/generated/assets/react/release/index.android.bundle.hbc android/app/build/generated/assets/react/release/index.android.bundle
+                  
+                  # Verify Hermes bytecode was created
+                  if [ -f "android/app/build/generated/assets/react/release/index.android.bundle" ]; then
+                    echo "Hermes bytecode generated successfully"
+                    echo "Hermes bytecode size: \$(du -h android/app/build/generated/assets/react/release/index.android.bundle | cut -f1)"
+                    echo "Source map size: \$(du -h android/app/build/generated/assets/react/release/index.android.bundle.map | cut -f1)"
+                    ls -la android/app/build/generated/assets/react/release/
+                  else
+                    echo "Hermes bytecode generation failed"
+                    exit 1
+                  fi
+                else
+                  echo "Android bundle generation failed"
+                  exit 1
+                fi
+              """
+            }
+            
+            // Build for iOS
+            if (params.platform == "ios" || params.platform == "both") {
+              sh """
+                # Get package version and set as environment variable for transform-inline-environment-variables
+                export PACKAGE_VERSION=${env.PACKAGE_VERSION}
+                export GIT_COMMIT_SHORT=\$(echo ${env.CUSTOM_GIT_COMMIT} | cut -c1-7)
+                export BUILD_DATE=\$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+                
+                echo "Setting environment variables for Metro bundle (iOS):"
+                echo "PACKAGE_VERSION: \$PACKAGE_VERSION"
+                echo "GIT_COMMIT_SHORT: \$GIT_COMMIT_SHORT"
+                echo "BUILD_DATE: \$BUILD_DATE"
+                
+                # Create bundle directory
+                mkdir -p ios/build/generated/assets/react/release
+                
+                # Generate React Native bundle for iOS
+                PACKAGE_VERSION=\$PACKAGE_VERSION \\
+                GIT_COMMIT_SHORT=\$GIT_COMMIT_SHORT \\
+                BUILD_DATE=\$BUILD_DATE \\
+                npx react-native bundle \\
+                  --platform ios \\
+                  --dev false \\
+                  --entry-file index.js \\
+                  --bundle-output ios/build/generated/assets/react/release/main.jsbundle \\
+                  --assets-dest ios/build/generated/res/react/release \\
+                  --sourcemap-output ios/build/generated/assets/react/release/main.jsbundle.map \\
+                  --minify true \\
+                  --reset-cache
+                
+                # Verify bundle was created
+                if [ -f "ios/build/generated/assets/react/release/main.jsbundle" ]; then
+                  echo "iOS bundle generated successfully with version \$PACKAGE_VERSION"
+                  echo "Bundle size: \$(du -h ios/build/generated/assets/react/release/main.jsbundle | cut -f1)"
+                  ls -la ios/build/generated/assets/react/release/
+                  
+                  # Convert JS bundle to Hermes bytecode
+                  echo "Converting JavaScript bundle to Hermes bytecode..."
+                  node_modules/react-native/sdks/hermesc/linux64-bin/hermesc \\
+                    -w \\
+                    -emit-binary \\
+                    -max-diagnostic-width=80 \\
+                    -out ios/build/generated/assets/react/release/main.jsbundle.hbc \\
+                    ios/build/generated/assets/react/release/main.jsbundle \\
+                    -output-source-map
+                  
+                  # Replace original bundle with Hermes bytecode
+                  mv ios/build/generated/assets/react/release/main.jsbundle.hbc ios/build/generated/assets/react/release/main.jsbundle
+                  
+                  # Verify Hermes bytecode was created
+                  if [ -f "ios/build/generated/assets/react/release/main.jsbundle" ]; then
+                    echo "Hermes bytecode generated successfully"
+                    echo "Hermes bytecode size: \$(du -h ios/build/generated/assets/react/release/main.jsbundle | cut -f1)"
+                    echo "Source map size: \$(du -h ios/build/generated/assets/react/release/main.jsbundle.map | cut -f1)"
+                    ls -la ios/build/generated/assets/react/release/
+                  else
+                    echo "Hermes bytecode generation failed"
+                    exit 1
+                  fi
+                else
+                  echo "iOS bundle generation failed"
+                  exit 1
+                fi
+              """
+            }
+          }
+        }
+      }
+    }
+
+    stage("Create Git Tag") {
+      steps {
+        dir('consumer') {
+        script {
+            env.FAILED_STAGE = env.STAGE_NAME
+            
+              sh """
+                # Configure git
+                git config user.name "${GIT_AUTHOR_NAME}"
+                git config user.email "${GIT_AUTHOR_EMAIL}"
+                
+                # Create and push tag
+                export TAG_NAME="v${env.PACKAGE_VERSION}-consumer-bundle"
+                git tag \$TAG_NAME
+                
+                # Push tag to origin
+                git push origin \$TAG_NAME
+                
+                echo "Created and pushed tag: \$TAG_NAME"
+              """
+          }
+        }
+      }
+    }
+
+    stage("Deploy to Sandbox") {
+      when {
+        anyOf {
+          branch "main"
+          branch "devqa-*"
+          branch "ui_hotpush"
+        }
+      }
+      steps{
+          script {
+            env.FAILED_STAGE = env.STAGE_NAME
+            env.UPLOADED_FILES = ""
+            setupAWS(env, false)
+            s3Upload(env, false)
+        }
+      }
+    }
+
+    stage("Deploy to Production") {
+      steps{
+          script {
+            env.FAILED_STAGE = env.STAGE_NAME
+            setupAWS(env, true)
+            s3Upload(env, true)
+        }
+      }
+    }
+
+    stage("Summary"){
+      steps {
+        script {
+          env.FAILED_STAGE = env.STAGE_NAME
+          echo "Build completed successfully!"
+          echo "Package Version: ${env.PACKAGE_VERSION}"
+          echo "Uploaded files: ${env.UPLOADED_FILES}"
+          
+          if (env.ANDROID_BUNDLE_S3_PATH) {
+            echo "Android Zip URL: https://ny.assets.juspay.in/${env.S3_PATH}/android/react-native-bundle-${env.PACKAGE_VERSION}.zip"
+            echo "Android Bundle URL: https://ny.assets.juspay.in/${env.S3_PATH}/android/index.android.bundle"
+            echo "Android Assets URL: https://ny.assets.juspay.in/${env.S3_PATH}/android/"
+          }
+          
+          if (env.IOS_BUNDLE_S3_PATH) {
+            echo "iOS Zip URL: https://ny.assets.juspay.in/${env.S3_PATH}/ios/react-native-bundle-${env.PACKAGE_VERSION}.zip"
+            echo "iOS Bundle URL: https://ny.assets.juspay.in/${env.S3_PATH}/ios/main.jsbundle"
+            echo "iOS Assets URL: https://ny.assets.juspay.in/${env.S3_PATH}/ios/"
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      script {
+        echo "******************************************"
+        echo "Pipeline completed"
+        echo "******************************************"
+        
+        // Clean up
+        sh """
+          rm -rf consumer/android/app/build/generated/assets/react/
+          rm -rf consumer/android/app/build/generated/res/react/
+          rm -rf consumer/ios/build/generated/assets/react/
+          rm -rf consumer/ios/build/generated/res/react/
+        """
+      }
+    }
+    success {
+      script {
+          echo "******************************************"
+          echo "Sending Build Success Message To Slack"
+          echo "******************************************"
+          def headingMessage = ":white_check_mark: *React Native Bundle Build Success*\n"
+          def bundleInfo = ""
+          if (env.ANDROID_BUNDLE_S3_PATH) {
+            bundleInfo += "Android Bundle: https://ny.assets.juspay.in/${env.S3_PATH}/android/react-native-bundle-${env.PACKAGE_VERSION}.zip\n"
+            bundleInfo += "Android Individual Bundle: https://ny.assets.juspay.in/${env.S3_PATH}/android/index.android.bundle\n"
+            bundleInfo += "Android Individual Assets: https://ny.assets.juspay.in/${env.S3_PATH}/android/\n"
+          }
+          if (env.IOS_BUNDLE_S3_PATH) {
+            bundleInfo += "iOS Bundle: https://ny.assets.juspay.in/${env.S3_PATH}/ios/react-native-bundle-${env.PACKAGE_VERSION}.zip\n"
+            bundleInfo += "iOS Individual Bundle: https://ny.assets.juspay.in/${env.S3_PATH}/ios/main.jsbundle\n"
+            bundleInfo += "iOS Individual Assets: https://ny.assets.juspay.in/${env.S3_PATH}/ios/\n"
+          }
+          if (bundleInfo != "") {
+            bundleInfo += "Contains: React Native bundle + Hermes bytecode + assets\n"
+            bundleInfo += "Source maps: Uploaded separately to S3\n"
+            bundleInfo += "Individual files: Available for selective downloading\n"
+          }
+          def finalMessage = headingMessage + getRepoNameMessage() + getCurrentBranchMessage() + getGitCommit() + getPRAuthorMessage() + getDescription() + getBuildID() + getPackageVersion() + bundleInfo
+          slackSend channel: "C04974AT1GQ", color: "good", message: finalMessage
+      }
+    }
+    // unsuccessful {
+    //     script {
+    //         echo "******************************************"
+    //         echo "Sending Build Error Message To Slack"
+    //         echo "******************************************"
+    //         def headingMessage = ":x: *React Native Bundle Build Failed*\n"
+    //         def stageFailed = "`Stage Failed` : *${FAILED_STAGE}*\n"
+    //         def finalMessage = headingMessage + getRepoNameMessage() + getCurrentBranchMessage() + stageFailed + getDescription() + getBuildID()
+    //         slackSend channel: "C04974AT1GQ", color: "danger", message: finalMessage
+    //    }
+    //  }
+  }
+}

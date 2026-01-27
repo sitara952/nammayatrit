@@ -1,0 +1,23 @@
+import React from "react"
+import { FC } from "react"
+import Svg, { Path } from "react-native-svg"
+
+interface PaymentManagementIconProps {
+    color?: string;
+    size?: number;
+    backgroundColor?: string;
+}
+
+const PaymentManagementIcon : FC<PaymentManagementIconProps> = ({ color = "#3B3A3C", size = 16 }) => {
+    const viewBoxWidth = 24;
+    const viewBoxHeight = 21;
+    const aspectRatio = viewBoxHeight / viewBoxWidth;
+    
+    return (
+        <Svg accessible={false} width={size} height={size * aspectRatio} viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`} fill="none">
+            <Path fill={color} d="M17.7687 8.3818H21.9998C21.9998 4.98459 19.9642 3 16.5154 3H7.48438C4.03553 3 2 4.98459 2 8.33847V15.6615C2 19.0154 4.03553 21 7.48438 21H16.5154C19.9642 21 21.9998 19.0154 21.9998 15.6615V15.3495H17.7687C15.805 15.3495 14.2132 13.7975 14.2132 11.883C14.2132 9.96849 15.805 8.41647 17.7687 8.41647V8.3818ZM17.7689 9.87207H21.2533C21.6657 9.87207 22 10.198 22 10.6V13.1306C21.9952 13.5307 21.6637 13.8539 21.2533 13.8586H17.8489C16.8548 13.8716 15.9856 13.208 15.7601 12.264C15.6472 11.6779 15.8057 11.0732 16.1931 10.6119C16.5806 10.1505 17.1574 9.87973 17.7689 9.87207ZM17.9205 12.5327H18.2494C18.6716 12.5327 19.0138 12.199 19.0138 11.7873C19.0138 11.3757 18.6716 11.042 18.2494 11.042H17.9205C17.7186 11.0397 17.5241 11.1163 17.3805 11.2547C17.2369 11.3931 17.1561 11.5818 17.1561 11.7787C17.156 12.1917 17.4969 12.5279 17.9205 12.5327ZM6.73802 8.38221H12.3824C12.8046 8.38221 13.1468 8.04853 13.1468 7.63691C13.1468 7.22529 12.8046 6.8916 12.3824 6.8916H6.73802C6.31928 6.89157 5.97846 7.22001 5.97359 7.62824C5.97356 8.04129 6.3144 8.37747 6.73802 8.38221Z" />
+        </Svg>
+    )
+}
+
+export default PaymentManagementIcon;

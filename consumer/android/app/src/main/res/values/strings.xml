@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Bridge</string>
+    <string name="dev_port" translatable="false">8084</string>
+    <string name="ota_base_url">https://airborne.juspay.in/release/movingtech/default</string>
+</resources>

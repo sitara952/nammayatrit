@@ -1,0 +1,11 @@
+framework module UTS_SDK {
+  umbrella header "UTS_SDK.h"
+  export *
+
+  module * { export * }
+}
+
+module UTS_SDK.Swift {
+  header "UTS_SDK-Swift.h"
+  requires objc
+}

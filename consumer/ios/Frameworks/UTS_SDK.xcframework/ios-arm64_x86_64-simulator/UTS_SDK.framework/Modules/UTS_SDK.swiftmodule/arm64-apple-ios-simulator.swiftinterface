@@ -1,0 +1,450 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.1 effective-5.10 (swiftlang-6.1.0.110.21 clang-1700.0.13.3)
+// swift-module-flags: -target arm64-apple-ios15.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name UTS_SDK
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -interface-compiler-version 6.1
+import CFNetwork
+import CommonCrypto
+import CoreLocation
+import DeveloperToolsSupport
+import Foundation
+import QuartzCore
+import Swift
+import SwiftUI
+import UIKit
+@_exported import UTS_SDK
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+@objc @_inheritsConvenienceInitializers public class TicketDetails : ObjectiveC.NSObject {
+  @objc override dynamic public init()
+  public init(mobile: Swift.String, utsNum: Swift.String, adult: Swift.Int, child: Swift.Int, via: Swift.String, classCode: Swift.String, tktType: Swift.String, trainType: Swift.String, sourceStation: Swift.String, destinationStation: Swift.String, txnTime: Swift.String, cashRecieved: Swift.String, serviceTax: Swift.String, QRCode: Swift.String, QRShowFlag: Swift.Int, QRVersion: Swift.String, distance: Swift.Int, jrnyCommen: Swift.String, retJrnyValidity: Swift.String, secretNo: Swift.String, tktColor: Swift.String, name: Swift.String, age: Swift.Int, sex: Swift.String, stTypeColor: Swift.String, validFrom: Swift.String, validUpto: Swift.String, icardNo: Swift.String, clusterID: Swift.String, gstSac: Swift.String, iRGSTIN: Swift.String, srcCode: Swift.String, desCode: Swift.String, src2: Swift.String, src3: Swift.String, des2: Swift.String, des3: Swift.String, mode: Swift.String, bookID: Swift.String, acemuDiscount: Swift.String, gstBrk1: Swift.String, gstBrk2: Swift.String, bookingMode: Swift.String, concessionCode: Swift.String, imei: Swift.String, concFormNum: Swift.String, covidCertNo: Swift.String, validityType: Swift.String, linkedUTSNo: Swift.String, routeMessage: Swift.String, escort: Swift.Int, divyangIdCard: Swift.String, srcName: Swift.String, desName: Swift.String, srcRegional: Swift.String, desRegional: Swift.String, srcHindi: Swift.String, desHindi: Swift.String, buttonColorHex: Swift.String, buttonTextColorHex: Swift.String)
+  @objc deinit
+}
+public struct UTSConfig {
+  public let agentAccountID: Swift.String
+  public let deviceID: Swift.String
+  public let sessionID: Swift.String
+  public let zone: Swift.String
+  public let osType: Swift.String
+  public init(agentAccountID: Swift.String, deviceID: Swift.String, sessionID: Swift.String, zone: Swift.String, osType: Swift.String = "IOS")
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public class UMClientRequestReinitialization : Swift.Codable {
+  final public let mobileNumber: Swift.String
+  final public let appCode: Swift.String
+  final public let agentAccountID: Swift.String
+  final public let deviceID: Swift.String
+  final public let zone: Swift.String
+  public init(mobileNumber: Swift.String, appCode: Swift.String, agentAccountID: Swift.String, deviceID: Swift.String, zone: Swift.String)
+  public func toDictionary() -> [Swift.String : Any]
+  public func toJSON() throws -> Swift.String
+  @objc deinit
+  public func encode(to encoder: any Swift.Encoder) throws
+  required public init(from decoder: any Swift.Decoder) throws
+}
+public struct UMClientRequestBooking {
+  public let mobileNumber: Swift.String
+  public let appCode: Swift.String
+  public let registrationID: Swift.String
+  public let agentAccountID: Swift.Int
+  public let zone: Swift.String
+  public let sourceCode: Swift.String
+  public let destinationCode: Swift.String
+  public let deviceID: Swift.String
+  public let mobileMake: Swift.String
+  public let mobileModel: Swift.String
+  public let ticketTypeCode: Swift.String
+  public let routeID: Swift.String
+  public init(mobileNumber: Swift.String, appCode: Swift.String, registrationID: Swift.String, agentAccountID: Swift.Int, zone: Swift.String, sourceCode: Swift.String, destinationCode: Swift.String, deviceID: Swift.String, mobileMake: Swift.String, mobileModel: Swift.String, ticketTypeCode: Swift.String, routeID: Swift.String)
+}
+public struct UMClientRequestShowTicket {
+  public let mobileNumber: Swift.String
+  public let appCode: Swift.String
+  public let deviceID: Swift.String
+  public let agentAccountID: Swift.Int
+  public let zone: Swift.String
+  public let ticketEncData: Swift.String
+  public let sourceStationName: Swift.String
+  public let destinationStationName: Swift.String
+  public let sourceStationNameHindi: Swift.String
+  public let destinationStationNameHindi: Swift.String
+  public let sourceStationNameRegional: Swift.String
+  public let destinationStationNameRegional: Swift.String
+  public let buttonColorHex: Swift.String
+  public let buttonTextColorHex: Swift.String
+  public init(mobileNumber: Swift.String, appCode: Swift.String, deviceID: Swift.String, agentAccountID: Swift.Int, zone: Swift.String, ticketEncData: Swift.String, sourceStationName: Swift.String = "", destinationStationName: Swift.String = "", sourceStationNameHindi: Swift.String = "", destinationStationNameHindi: Swift.String = "", sourceStationNameRegional: Swift.String = "", destinationStationNameRegional: Swift.String = "", buttonColorHex: Swift.String = "#FE7469", buttonTextColorHex: Swift.String = "#FFFFFF")
+}
+public struct UMSdkInit {
+  public let appCode: Swift.String
+  public let sdkChannelId: Swift.String
+  public let agentAccountId: Swift.String
+  public let sdkPassword: Swift.String
+  public let sdkActivationKey: Swift.String
+  public init(appCode: Swift.String, sdkChannelId: Swift.String, agentAccountId: Swift.String, sdkPassword: Swift.String, sdkActivationKey: Swift.String)
+}
+public enum UMClientAppType {
+  case UAT
+  case PROD
+  public static func == (a: UTS_SDK.UMClientAppType, b: UTS_SDK.UMClientAppType) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public enum SDKError : Swift.Error {
+  case encodingFailed([Swift.String : Any])
+  case decodingFailed([Swift.String : Any])
+  case requestFailed([Swift.String : Any])
+  case invalidURL([Swift.String : Any])
+  case unknownError([Swift.String : Any])
+  case noData([Swift.String : Any])
+}
+extension UTS_SDK.SDKError : Foundation.LocalizedError {
+  public var getError: [Swift.String : Any] {
+    get
+  }
+}
+@objc @_hasMissingDesignatedInitializers public class UTSManager : ObjectiveC.NSObject, CoreLocation.CLLocationManagerDelegate {
+  public static var shared: UTS_SDK.UTSManager {
+    get
+  }
+  public func launchUMSdkForReinitialization(data: UTS_SDK.UMClientRequestReinitialization, accessToken: Swift.String, onFailure: @escaping UTS_SDK.UMInitFailure, onSuccess: @escaping UTS_SDK.UMInitSuccess)
+  public func launchUMSdkForBooking(from viewController: UIKit.UIViewController, data: UTS_SDK.UMClientRequestBooking, accessToken: Swift.String, onFailure: @escaping UTS_SDK.UMBookingFailure, onSuccess: @escaping UTS_SDK.UMBookingSuccess)
+  public func launchUMSdkForShowTicket(from viewController: UIKit.UIViewController, ticketData: UTS_SDK.UMClientRequestShowTicket, onFailure: @escaping UTS_SDK.UMShowTicketFailure, onSuccess: @escaping UTS_SDK.UMShowTicketSuccess)
+  public static func configure(umSdkInit: UTS_SDK.UMSdkInit, umClientAppType: UTS_SDK.UMClientAppType)
+  @objc public func locationManagerDidChangeAuthorization(_ manager: CoreLocation.CLLocationManager)
+  @objc public func locationManager(_ manager: CoreLocation.CLLocationManager, didUpdateLocations locations: [CoreLocation.CLLocation])
+  @objc public func locationManager(_ manager: CoreLocation.CLLocationManager, didFailWithError error: any Swift.Error)
+  @objc deinit
+}
+public struct URLPaths {
+}
+@objc @_inheritsConvenienceInitializers @_Concurrency.MainActor @preconcurrency public class JourneyTicket : UIKit.UIViewController {
+  @_Concurrency.MainActor @preconcurrency public func configure(with ticket: UTS_SDK.TicketDetails)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidLoad()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func didReceiveMemoryWarning()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidAppear(_ animated: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewWillDisappear(_ animated: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(nibName nibNameOrNil: Swift.String?, bundle nibBundleOrNil: Foundation.Bundle?)
+  @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
+  @objc deinit
+}
+public typealias ServiceCompletion<T> = (Swift.Result<T, UTS_SDK.SDKError>) -> Swift.Void where T : Swift.Decodable
+public protocol APIService {
+  func request<T>(endpoint: Swift.String, method: Swift.String, body: Foundation.Data?, headers: [Swift.String : Swift.String], completion: @escaping UTS_SDK.ServiceCompletion<T>) where T : Swift.Decodable
+}
+public struct InitSDKRequest : Swift.Codable {
+  public let agentAccountID: Swift.Int
+  public let deviceID: Swift.String
+  public let sessionID: Swift.Int
+  public let zone: Swift.String
+  public init(agentAccountID: Swift.Int, deviceID: Swift.String, sessionID: Swift.Int, zone: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SDKResponse : Swift.Codable {
+  public let respCode: Swift.Int
+  public let respMessage: Swift.String
+  public let data: Swift.String
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct SdkRequest : Swift.Codable {
+  public let mobileNo: Swift.String
+  public let appCode: Swift.String
+  public let data: Swift.String
+  public let deviceID: Swift.String
+  public init(mobileNo: Swift.String, appCode: Swift.String, data: Swift.String, deviceID: Swift.String)
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct GpsInput : Swift.Codable, Swift.CustomStringConvertible {
+  public init(agentAccountID: Swift.Int, deviceID: Swift.String = "", sessionID: Swift.String, zone: Swift.String = "", source: Swift.String = "", destination: Swift.String = "", latitude: Swift.Double, longitude: Swift.Double, deviceAccuracy: Swift.Double, passengerSpeed: Swift.Double, registrationID: Swift.String = "8ZvcsICx14563mPLVDWJJA==", mobileMake: Swift.String = "", mobileModel: Swift.String = "", tktType: Swift.String = "J", osType: Swift.String = "IOS", routeID: Swift.String = "0")
+  public var description: Swift.String {
+    get
+  }
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+@objc @_inheritsConvenienceInitializers @IBDesignable @_Concurrency.MainActor @preconcurrency open class MarqueeLabel : UIKit.UILabel, QuartzCore.CAAnimationDelegate {
+  public enum MarqueeType : Swift.CaseIterable {
+    case left
+    case leftRight
+    case right
+    case rightLeft
+    case continuous
+    case continuousReverse
+    public static func == (a: UTS_SDK.MarqueeLabel.MarqueeType, b: UTS_SDK.MarqueeLabel.MarqueeType) -> Swift.Bool
+    public typealias AllCases = [UTS_SDK.MarqueeLabel.MarqueeType]
+    nonisolated public static var allCases: [UTS_SDK.MarqueeLabel.MarqueeType] {
+      get
+    }
+    public func hash(into hasher: inout Swift.Hasher)
+    public var hashValue: Swift.Int {
+      get
+    }
+  }
+  @_Concurrency.MainActor @preconcurrency open var type: UTS_SDK.MarqueeLabel.MarqueeType {
+    get
+    set
+  }
+  @_Concurrency.MainActor @preconcurrency open var scrollSequence: [any UTS_SDK.MarqueeStep]?
+  @_Concurrency.MainActor @preconcurrency open var animationCurve: UIKit.UIView.AnimationCurve
+  @objc @IBInspectable @_Concurrency.MainActor @preconcurrency open var labelize: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @IBInspectable @_Concurrency.MainActor @preconcurrency open var holdScrolling: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @IBInspectable @_Concurrency.MainActor @preconcurrency public var forceScrolling: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc @IBInspectable @_Concurrency.MainActor @preconcurrency open var tapToScroll: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency open var isPaused: Swift.Bool {
+    get
+  }
+  @_Concurrency.MainActor @preconcurrency open var awayFromHome: Swift.Bool {
+    get
+  }
+  @_Concurrency.MainActor @preconcurrency open var animationPosition: CoreFoundation.CGFloat? {
+    get
+  }
+  public enum SpeedLimit {
+    case rate(CoreFoundation.CGFloat)
+    case duration(CoreFoundation.CGFloat)
+  }
+  @_Concurrency.MainActor @preconcurrency open var speed: UTS_SDK.MarqueeLabel.SpeedLimit {
+    get
+    set
+  }
+  @objc @available(*, deprecated, message: "Use speed property instead")
+  @IBInspectable @_Concurrency.MainActor @preconcurrency open var scrollDuration: CoreFoundation.CGFloat {
+    @objc get
+    @objc set
+  }
+  @objc @available(*, deprecated, message: "Use speed property instead")
+  @IBInspectable @_Concurrency.MainActor @preconcurrency open var scrollRate: CoreFoundation.CGFloat {
+    @objc get
+    @objc set
+  }
+  @objc @IBInspectable @_Concurrency.MainActor @preconcurrency open var leadingBuffer: CoreFoundation.CGFloat {
+    @objc get
+    @objc set
+  }
+  @objc @IBInspectable @_Concurrency.MainActor @preconcurrency open var trailingBuffer: CoreFoundation.CGFloat {
+    @objc get
+    @objc set
+  }
+  @objc @IBInspectable @_Concurrency.MainActor @preconcurrency open var fadeLength: CoreFoundation.CGFloat {
+    @objc get
+    @objc set
+  }
+  @objc @IBInspectable @_Concurrency.MainActor @preconcurrency open var animationDelay: CoreFoundation.CGFloat
+  @_Concurrency.MainActor @preconcurrency public var animationDuration: CoreFoundation.CGFloat {
+    get
+  }
+  @_Concurrency.MainActor @preconcurrency open class func restartLabelsOfController(_ controller: UIKit.UIViewController)
+  @_Concurrency.MainActor @preconcurrency open class func controllerViewWillAppear(_ controller: UIKit.UIViewController)
+  @_Concurrency.MainActor @preconcurrency open class func controllerViewDidAppear(_ controller: UIKit.UIViewController)
+  @_Concurrency.MainActor @preconcurrency open class func controllerLabelsLabelize(_ controller: UIKit.UIViewController)
+  @_Concurrency.MainActor @preconcurrency open class func controllerLabelsAnimate(_ controller: UIKit.UIViewController)
+  @_Concurrency.MainActor @preconcurrency public init(frame: CoreFoundation.CGRect, rate: CoreFoundation.CGFloat, fadeLength fade: CoreFoundation.CGFloat)
+  @_Concurrency.MainActor @preconcurrency public init(frame: CoreFoundation.CGRect, duration: CoreFoundation.CGFloat, fadeLength fade: CoreFoundation.CGFloat)
+  @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder aDecoder: Foundation.NSCoder)
+  @_Concurrency.MainActor @preconcurrency @objc convenience override dynamic public init(frame: CoreFoundation.CGRect)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open func awakeFromNib()
+  @available(iOS 8.0, *)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open func prepareForInterfaceBuilder()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open func layoutSubviews()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open func willMove(toWindow newWindow: UIKit.UIWindow?)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open func didMoveToWindow()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open func sizeThatFits(_ size: CoreFoundation.CGSize) -> CoreFoundation.CGSize
+  @_Concurrency.MainActor @preconcurrency open func sizeThatFits(_ size: CoreFoundation.CGSize, withBuffers: Swift.Bool) -> CoreFoundation.CGSize
+  @_Concurrency.MainActor @preconcurrency open func textLayoutSize() -> CoreFoundation.CGSize
+  @_Concurrency.MainActor @preconcurrency open func labelShouldScroll() -> Swift.Bool
+  @_Concurrency.MainActor @preconcurrency @objc public func animationDidStop(_ anim: QuartzCore.CAAnimation, finished flag: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open class var layerClass: Swift.AnyClass {
+    @objc get
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open func draw(_ layer: QuartzCore.CALayer, in ctx: CoreGraphics.CGContext)
+  @objc @_Concurrency.MainActor @preconcurrency public func restartForViewController(_ notification: Foundation.Notification)
+  @objc @_Concurrency.MainActor @preconcurrency public func labelizeForController(_ notification: Foundation.Notification)
+  @objc @_Concurrency.MainActor @preconcurrency public func animateForController(_ notification: Foundation.Notification)
+  @_Concurrency.MainActor @preconcurrency public func triggerScrollStart()
+  @objc @_Concurrency.MainActor @preconcurrency public func restartLabel()
+  @available(*, deprecated, message: "Use the shutdownLabel function instead")
+  @_Concurrency.MainActor @preconcurrency public func resetLabel()
+  @objc @_Concurrency.MainActor @preconcurrency public func shutdownLabel()
+  @_Concurrency.MainActor @preconcurrency public func pauseLabel()
+  @_Concurrency.MainActor @preconcurrency public func unpauseLabel()
+  @objc @_Concurrency.MainActor @preconcurrency public func labelWasTapped(_ recognizer: UIKit.UIGestureRecognizer)
+  @_Concurrency.MainActor @preconcurrency open func textCoordinateForFramePoint(_ point: CoreFoundation.CGPoint) -> CoreFoundation.CGPoint?
+  @_Concurrency.MainActor @preconcurrency open func labelWillBeginScroll()
+  @_Concurrency.MainActor @preconcurrency open func labelReturnedToHome(_ finished: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var text: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var attributedText: Foundation.NSAttributedString? {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var font: UIKit.UIFont! {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var textColor: UIKit.UIColor! {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var backgroundColor: UIKit.UIColor? {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var shadowColor: UIKit.UIColor? {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var shadowOffset: CoreFoundation.CGSize {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var highlightedTextColor: UIKit.UIColor? {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var isHighlighted: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var isEnabled: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var numberOfLines: Swift.Int {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var baselineAdjustment: UIKit.UIBaselineAdjustment {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var intrinsicContentSize: CoreFoundation.CGSize {
+    @objc get
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var tintColor: UIKit.UIColor! {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open func tintColorDidChange()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var contentMode: UIKit.UIView.ContentMode {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var isAccessibilityElement: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var adjustsFontForContentSizeCategory: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open func forBaselineLayout() -> UIKit.UIView
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var forLastBaselineLayout: UIKit.UIView {
+    @objc get
+  }
+  @available(iOS 15.0, tvOS 15.0, *)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var minimumContentSizeCategory: UIKit.UIContentSizeCategory? {
+    @objc get
+    @objc set
+  }
+  @available(iOS 15.0, tvOS 15.0, *)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var appliedContentSizeCategoryLimitsDescription: Swift.String {
+    @objc get
+  }
+  @available(iOS 15.0, tvOS 15.0, *)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic open var maximumContentSizeCategory: UIKit.UIContentSizeCategory? {
+    @objc get
+    @objc set
+  }
+  @objc deinit
+}
+public protocol MarqueeStep {
+  var timeStep: CoreFoundation.CGFloat { get }
+  var timingFunction: UIKit.UIView.AnimationCurve { get }
+  var edgeFades: UTS_SDK.EdgeFade { get }
+}
+public struct ScrollStep : UTS_SDK.MarqueeStep {
+  public enum Position {
+    case home
+    case away
+    case partial(CoreFoundation.CGFloat)
+  }
+  public let timeStep: CoreFoundation.CGFloat
+  public let timingFunction: UIKit.UIView.AnimationCurve
+  public let position: UTS_SDK.ScrollStep.Position
+  public let edgeFades: UTS_SDK.EdgeFade
+  public init(timeStep: CoreFoundation.CGFloat, timingFunction: UIKit.UIView.AnimationCurve = .linear, position: UTS_SDK.ScrollStep.Position, edgeFades: UTS_SDK.EdgeFade)
+}
+public struct FadeStep : UTS_SDK.MarqueeStep {
+  public let timeStep: CoreFoundation.CGFloat
+  public let timingFunction: UIKit.UIView.AnimationCurve
+  public let edgeFades: UTS_SDK.EdgeFade
+  public init(timeStep: CoreFoundation.CGFloat, timingFunction: UIKit.UIView.AnimationCurve = .linear, edgeFades: UTS_SDK.EdgeFade)
+}
+public struct EdgeFade : Swift.OptionSet {
+  public let rawValue: Swift.Int
+  public static let leading: UTS_SDK.EdgeFade
+  public static let trailing: UTS_SDK.EdgeFade
+  public init(rawValue: Swift.Int)
+  public typealias ArrayLiteralElement = UTS_SDK.EdgeFade
+  public typealias Element = UTS_SDK.EdgeFade
+  public typealias RawValue = Swift.Int
+}
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @_Concurrency.MainActor @preconcurrency public class ViewFromXib : UIKit.UIView {
+  @objc deinit
+}
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class NetworkService : ObjectiveC.NSObject, UTS_SDK.APIService, Foundation.URLSessionDelegate {
+  public static let shared: UTS_SDK.NetworkService
+  public func request<T>(endpoint: Swift.String, method: Swift.String = "POST", body: Foundation.Data? = nil, headers: [Swift.String : Swift.String] = ["Content-Type": "application/json", "Accept": "application/json"], completion: @escaping UTS_SDK.ServiceCompletion<T>) where T : Swift.Decodable
+  @objc public func urlSession(_ session: Foundation.URLSession, didReceive challenge: Foundation.URLAuthenticationChallenge, completionHandler: @escaping (Foundation.URLSession.AuthChallengeDisposition, Foundation.URLCredential?) -> Swift.Void)
+  @objc deinit
+}
+@objc @_inheritsConvenienceInitializers @_Concurrency.MainActor @preconcurrency public class DemoView : UIKit.UIViewController {
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidLoad()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(nibName nibNameOrNil: Swift.String?, bundle nibBundleOrNil: Foundation.Bundle?)
+  @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
+  @objc deinit
+}
+public typealias UMInitSuccess = (_ successMessage: [Swift.String : Any]) -> Swift.Void
+public typealias UMInitFailure = (_ errorMessage: [Swift.String : Any]) -> Swift.Void
+public typealias UMBookingSuccess = (_ successMessage: [Swift.String : Any]) -> Swift.Void
+public typealias UMBookingFailure = (_ errorMessage: [Swift.String : Any]) -> Swift.Void
+public typealias UMShowTicketSuccess = (_ successMessage: Swift.String) -> Swift.Void
+public typealias UMShowTicketFailure = (_ errorMessage: [Swift.String : Any]) -> Swift.Void
+@objc @_inheritsConvenienceInitializers @_Concurrency.MainActor @preconcurrency public class QrView : UIKit.UIViewController {
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidLoad()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidAppear(_ animated: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidDisappear(_ animated: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(nibName nibNameOrNil: Swift.String?, bundle nibBundleOrNil: Foundation.Bundle?)
+  @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
+  @objc deinit
+}
+public class TicketService {
+  public init(apiService: any UTS_SDK.APIService = NetworkService.shared)
+  public func gpsCheck(data: UTS_SDK.SdkRequest, completion: @escaping UTS_SDK.ServiceCompletion<UTS_SDK.SDKResponse>)
+  @objc deinit
+}
+extension UTS_SDK.UTSConfig : Swift.Encodable {}
+extension UTS_SDK.UTSConfig : Swift.Decodable {}
+extension UTS_SDK.UMClientAppType : Swift.Equatable {}
+extension UTS_SDK.UMClientAppType : Swift.Hashable {}
+extension UTS_SDK.MarqueeLabel.MarqueeType : Swift.Equatable {}
+extension UTS_SDK.MarqueeLabel.MarqueeType : Swift.Hashable {}

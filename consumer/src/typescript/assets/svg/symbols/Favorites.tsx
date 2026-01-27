@@ -1,0 +1,25 @@
+import React, { FC } from "react"
+import Svg, { G, Path, Defs, ClipPath, Rect } from "react-native-svg"
+
+
+const Favorites : FC<{fill: string | undefined}>= (props) =>  {
+    return (
+  <Svg width="100%" height="100%" viewBox="0 0 16 16" fill="none">
+    <G clipPath="url(#clip0_26_275)">
+      <Path
+        d="M14.4001 6.84399C14.3028 6.56414 14.2906 6.52764 14.1933 6.24779L10.0685 5.80977L8.31645 2.0014H7.69592L5.93166 5.80977L1.80694 6.24779C1.7096 6.52764 1.69744 6.56414 1.6001 6.84399L4.67842 9.81281L3.80238 13.9375C4.04573 14.1079 4.07006 14.1322 4.31341 14.3147L8.01227 12.2341L11.7111 14.3147C11.9545 14.1444 11.9788 14.12 12.2222 13.9375L11.3461 9.81281L14.4244 6.84399H14.4001Z"
+        fill={props.fill ?? "#5F616B"}
+      />
+    </G>
+    <Defs>
+      <ClipPath id="clip0_26_275">
+        <Rect
+          width="12.8" height="12.3011" fill="white" transform="translate(1.6001 2.00195)"
+        />
+      </ClipPath>
+    </Defs>
+  </Svg>
+    )
+}
+
+export default Favorites

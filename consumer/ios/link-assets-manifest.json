@@ -1,0 +1,37 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/AreaNormal-Black.otf",
+      "sha1": "86c2aa8d11dcf760e36a26a9fa5dffdcbb603f84"
+    },
+    {
+      "path": "assets/fonts/AreaNormal-Bold.otf",
+      "sha1": "64a057a80fb1f0184f985da84a18b06d1d768bfd"
+    },
+    {
+      "path": "assets/fonts/AreaNormal-Extrabold.otf",
+      "sha1": "aa67bbd2fcf809590cd915d3fd7695fc6238e6f0"
+    },
+    {
+      "path": "assets/fonts/AreaNormal-Medium.otf",
+      "sha1": "fc2743be4167641195bccb906824f58557e6d1e6"
+    },
+    {
+      "path": "assets/fonts/AreaNormal-Regular.otf",
+      "sha1": "aea2cc933ce52d659efad73d2e6a26219b35869e"
+    },
+    {
+      "path": "assets/fonts/AreaNormal-SemiBold.otf",
+      "sha1": "a3a71dd71f7c5dd8f1553a47e00d82e63da928d4"
+    },
+    {
+      "path": "assets/fonts/DepartureMono-Regular.otf",
+      "sha1": "f490da428af67742e6eb15783588145f5aed0c82"
+    },
+    {
+      "path": "assets/fonts/FE-Font.ttf",
+      "sha1": "9a67a47f51b668cde5ea47b93344cf13eab18108"
+    }
+  ]
+}

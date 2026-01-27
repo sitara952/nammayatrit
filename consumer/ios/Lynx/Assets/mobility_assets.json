@@ -1,0 +1,9 @@
+{
+   "images" : {
+      "bridge_logo" : true,
+      "ny_ic_no_past_rides" : true,
+      "splash_background" : true,
+      "splash_footer" : true,
+      "splash_logo" : true
+   }
+}

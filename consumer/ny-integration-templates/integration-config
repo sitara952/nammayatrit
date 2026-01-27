@@ -1,0 +1,18 @@
+{
+    "apiList": [
+        "/v2/maps/autoComplete",
+        "/v2/issue/{issueId}/updateStatus",
+        "/v2/estimate/{estimateId}/rejectUpgrade"
+    ],
+    "whitelist": [
+        "/v2/auth/generate-temp-app-code",
+        "/v2/multimodal/{journeyId}/initiate",
+        "/v2/identifyNearByBus"
+    ],
+    "avoidHeaders": [
+        "x-bundle-version",
+        "x-client-version",
+        "x-config-version",
+        "x-device"
+    ]
+}
