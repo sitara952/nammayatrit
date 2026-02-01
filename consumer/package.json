@@ -70,7 +70,7 @@
     "dayjs": "1.11.18",
     "react-native-moengage": "11.2.1",
     "depcheck": "^1.4.7",
-    "expo": "^51.0.32",
+    "expo": "^53.0.0",
     "fast-json-stable-stringify": "^2.1.0",
     "fuse.js": "^7.1.0",
     "hyper-sdk-react": "git+https://github.com/nammayatri/hyper-sdk-react.git#ny-consumer",
