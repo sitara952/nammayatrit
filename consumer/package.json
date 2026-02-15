@@ -79,7 +79,7 @@
     "metro": "0.80.12",
     "pako": "^2.1.0",
     "react": "19.0.0",
-    "react-native": "^0.79.7",
+    "react-native": "^0.84.0",
     "react-native-animateable-text": "^0.16.0",
     "react-native-app-monitor": "0.1.10",
     "react-native-calendars": "^1.1313.0",
